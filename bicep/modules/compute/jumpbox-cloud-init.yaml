@@ -8,6 +8,7 @@ packages:
   - gnupg
   - lsb-release
   - jq
+  - nodejs
 runcmd:
   # Installing kubectl
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -27,15 +28,7 @@ runcmd:
   - sudo apt-get install helm
 
   # Installing docker
-  - sudo apt-get remove -y moby-engine moby-cli
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   - sudo apt-get update
-  - sudo apt-get install -y moby-engine moby-cli
-  - sudo apt-get install --no-install-recommends -y moby-buildx
-  - sudo apt-get install -y moby-compose
-  - sudo systemctl is-active --quiet docker.service || systemctl start docker.service
-  - sudo systemctl is-enabled --quiet docker.service || systemctl enable docker.service
-  
-  # Install Snyk
-  - curl https://static.snyk.io/cli/latest/snyk-macos -o snyk
-  - chmod +x ./snyk
-  - mv ./snyk /usr/local/bin/
+  - sudo apt-get install docker-ce docker-ce-cli containerd.io --yes

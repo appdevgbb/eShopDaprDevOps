@@ -8,7 +8,7 @@ jobs:
     
     env:
       LOCATION: 'eastus'
-      RESOURCE_GROUP_NAME: 'rg-aks-devsecops-test'
+      RESOURCE_GROUP_NAME: 'rg-aks-devsecops'
 
     runs-on: ubuntu-latest
 

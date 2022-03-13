@@ -36,6 +36,9 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
+    - name: Install Snyk
+      uses: snyk/actions/setup@master
+
     - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
