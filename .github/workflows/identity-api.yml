@@ -2,6 +2,23 @@ name: identity-api
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+    - main
+
+    paths:
+    - src/BuildingBlocks/**
+    - src/Services/Identity/**
+    - .github/workflows/identity-api.yml
+  
+  pull_request:
+    branches:
+    - main
+
+    paths:
+    - src/BuildingBlocks/**
+    - src/Services/Identity/**
+    - .github/workflows/identity-api.yml
 
 jobs:
   Call-dev-sec-ci:

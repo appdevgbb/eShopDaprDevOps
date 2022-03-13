@@ -2,6 +2,23 @@ name: blazor-client
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+    - main
+
+    paths:
+    - src/BuildingBlocks/**
+    - src/Web/**
+    - .github/workflows/blazor-client.yml
+  
+  pull_request:
+    branches:
+    - main
+    
+    paths:
+    - src/BuildingBlocks/**
+    - src/Web/**
+    - .github/workflows/blazor-client.yml
 
 jobs:
   Call-dev-sec-ci:

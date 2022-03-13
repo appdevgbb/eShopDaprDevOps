@@ -44,7 +44,9 @@ jobs:
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: snyk.sarif    
+          sarif_file: snyk.sarif  
+
+      # TODO: Add in Run Microsoft Security DevOps Analysis action for Terrascan and ARM Template Analyzer  
 
       # Replace parameter in parameter file
       - name: Replace token parameters file

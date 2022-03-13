@@ -2,6 +2,23 @@ name: basket-api
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+    - main
+
+    paths:
+    - src/BuildingBlocks/**
+    - src/Services/Basket/**
+    - .github/workflows/basket-api.yml
+  
+  pull_request:
+    branches:
+    - main
+
+    paths:
+    - src/BuildingBlocks/**
+    - src/Services/Basket/**
+    - .github/workflows/basket-api.yml
 
 jobs:
   Call-dev-sec-ci:
