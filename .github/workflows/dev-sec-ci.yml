@@ -66,7 +66,7 @@ jobs:
     - name: Upload result to GitHub Code Scanning Alerts
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: snyk.sarif
+        sarif_file: snyksca.sarif
 
   container-scan:
     runs-on: self-hosted
