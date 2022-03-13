@@ -110,19 +110,6 @@ jobs:
           az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n jumpbox -a ${{ steps.armDeployment.outputs.jumpboxPrivateIP }}
         shell: pwsh
 
-      # - name: Enabled Flux Addon
-      #   run: |
-      #     az feature register --namespace Microsoft.ContainerService --name AKS-ExtensionManager
-      #     az provider register --namespace Microsoft.Kubernetes
-      #     az provider register --namespace Microsoft.ContainerService
-      #     az provider register --namespace Microsoft.KubernetesConfiguration
-      #     az extension add -n k8s-configuration
-      #     az extension add -n k8s-extension  
-      #     az extension update -n k8s-configuration
-      #     az extension update -n k8s-extension
-      #     az k8s-configuration flux create -g ${{ env.RESOURCE_GROUP_NAME }} -c ${{ steps.armDeployment.outputs.aksRgName }} -n flux-gitops --namespace flux -t connectedClusters --scope cluster -u https://github.com/fluxcd/flux2-kustomize-helm-example --branch main  --kustomization name=infra path=./infrastructure prune=true --kustomization name=apps path=./apps/staging prune=true dependsOn=["infra"]            
-      #   shell: pwsh        
-
       - uses: gliech/create-github-secret-action@v1
         name: Write ACR registry name in secrets
         with:

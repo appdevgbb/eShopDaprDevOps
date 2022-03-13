@@ -27,4 +27,15 @@ runcmd:
   - sudo apt-get install helm
 
   # Installing docker
-  - sudo apt-get install docker.io --yes
+  - sudo apt-get remove -y moby-engine moby-cli
+  - sudo apt-get update
+  - sudo apt-get install -y moby-engine moby-cli
+  - sudo apt-get install --no-install-recommends -y moby-buildx
+  - sudo apt-get install -y moby-compose
+  - sudo systemctl is-active --quiet docker.service || systemctl start docker.service
+  - sudo systemctl is-enabled --quiet docker.service || systemctl enable docker.service
+  
+  # Install Snyk
+  - curl https://static.snyk.io/cli/latest/snyk-macos -o snyk
+  - chmod +x ./snyk
+  - mv ./snyk /usr/local/bin/
