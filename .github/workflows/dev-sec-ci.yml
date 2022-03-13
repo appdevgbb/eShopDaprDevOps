@@ -52,6 +52,7 @@ jobs:
 
     - name: Run Synk SCA Test
       run: |
+       snyk auth ${{ secrets.SNYK_TOKEN }}
        snyk test --sarif-file-output=snyksca.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
 
     # - name: Run Synk Code and Dependency Scan
@@ -75,7 +76,7 @@ jobs:
 
     - name: Build container image
       run: |
-        docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
 
     # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
     - name: Run Trivy and Dockle container scan
