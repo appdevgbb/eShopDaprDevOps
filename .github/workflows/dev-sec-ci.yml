@@ -31,7 +31,7 @@ env:
 
 jobs:
   code-dep-scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
@@ -50,13 +50,17 @@ jobs:
         cd ${{ inputs.projectPath }}
         dotnet build --no-restore
 
-    - name: Run Synk Code and Dependency Scan
-      uses: snyk/actions/dotnet@master
-      continue-on-error: true # To make sure that SARIF upload gets called
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --sarif-file-output=snyk.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
+    - name: Run Synk SCA Test
+      run: |
+       snyk test --sarif-file-output=snyksca.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
+
+    # - name: Run Synk Code and Dependency Scan
+    #   uses: snyk/actions/dotnet@master
+    #   continue-on-error: true # To make sure that SARIF upload gets called
+    #   env:
+    #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    #   with:
+    #     args: --sarif-file-output=snyk.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
 
     - name: Upload result to GitHub Code Scanning Alerts
       uses: github/codeql-action/upload-sarif@v1
@@ -64,7 +68,7 @@ jobs:
         sarif_file: snyk.sarif
 
   container-scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
