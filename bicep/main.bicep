@@ -116,6 +116,8 @@ module aks 'modules/aks/aks.bicep' = {
       '${identityAks.outputs.identityId}': {}
     }
     workspaceId: workspace.outputs.workSpaceId
+    systemPoolNodeCount: systemPoolNodeCount
+    workloadNodeCount: workloadNodeCount
   }
 }
 
