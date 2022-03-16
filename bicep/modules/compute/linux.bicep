@@ -102,3 +102,7 @@ output runnerVmInfo array = [for i in range(0, numberOfSelfRunners): {
   privateIp: nic[i].properties.ipConfigurations[0].properties.privateIPAddress
   jumpboxname: vm[i].name
 }]
+
+output privateIps array = [for i in range(0, numberOfSelfRunners): {  
+  privateIp: nic[i].properties.ipConfigurations[0].properties.privateIPAddress  
+}]

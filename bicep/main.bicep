@@ -159,6 +159,6 @@ module selfRunners 'modules/compute/linux.bicep' = {
 // }
 
 //output arcName string = acr.outputs.acrName
-output runnersInfo array = selfRunners.outputs.runnerVmInfo
+output runnersInfo array = selfRunners.outputs.privateIps
 // output aksRgName string = 'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
 // output aksName string = aks.outputs.clusterName
