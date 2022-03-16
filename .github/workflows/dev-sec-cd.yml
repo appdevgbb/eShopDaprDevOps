@@ -78,11 +78,6 @@ jobs:
           template: ./bicep/main.json
           parameters: ./bicep/main.parameters.json     
 
-      - name: Echo private IP
-        run: |
-          Write-Output ${{ steps.armDeployment.outputs.runnersInfo }}
-        shell: pwsh
-
       # TODO 
       # - name: Add jumpbox A record
       #   run: |
