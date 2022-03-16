@@ -38,7 +38,7 @@ param adminSqlPassword string
 
 var suffix = uniqueString(resourceGroup().id)
 var aksInfraResourceGroupName =  'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
-var networkContributorRoleId = '4d97b98b-1d4f-4787-a291-c67834d212e7'
+var networkContributorRoleId = resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
 
 module vnet 'modules/network/vnet.bicep' = {
   name: 'vnet'
@@ -105,8 +105,21 @@ module identityAks 'modules/identity/userassigned.identity.bicep' = {
   }
 }
 
+module networkContributorRole 'modules/identity/role.bicep' = {
+  name: 'networkContributorRole'
+  params: {
+    principalId: identityAks.outputs.principalId
+    roleGuid: networkContributorRoleId
+    vnetName: vnet.outputs.virtualNetworkName
+    subnetName: vnet.outputs.aksSubnetName
+  }
+}
+
 module aks 'modules/aks/aks.bicep' = {
   name: 'aks'
+  dependsOn: [
+    networkContributorRole
+  ]
   params: {
     aadAdminGroupId: aadAdminGroupId
     aksAzureCniSettings: aksAzureCniSettings
@@ -118,14 +131,6 @@ module aks 'modules/aks/aks.bicep' = {
     workspaceId: workspace.outputs.workSpaceId
     systemPoolNodeCount: systemPoolNodeCount
     workloadNodeCount: workloadNodeCount
-  }
-}
-
-module networkContributorRole 'modules/identity/role.bicep' = {
-  name: 'networkContributorRole'
-  params: {
-    principalId: identityAks.outputs.principalId
-    roleGuid: networkContributorRoleId
   }
 }
 
