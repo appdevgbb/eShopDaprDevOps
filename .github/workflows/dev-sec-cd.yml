@@ -62,16 +62,6 @@ jobs:
           aadAdminGroupId: ${{ secrets.AAD_ADMIN_GROUP_ID }}
           adminSqlUsername: ${{ secrets.ADMIN_SQL_USERNAME }}
           adminSqlPassword: ${{ secrets.ADMIN_SQL_PASSWORD }}
-
-      - name: Replace token jumpbox init file
-        uses: cschleiden/replace-tokens@v1.0
-        with:        
-          tokenPrefix: __        
-          tokenSuffix: __        
-          files: '["bicep/modules/compute/jumpbox-cloud-init.yaml"]'
-        env:
-          GITHUB_REPOSITORY: $env.GITHUB_REPOSITORY
-          GITHUB_PAT: ${{ secrets.RUNNER_TOKEN }}
        
       # See the change to be deployed, a good practice
       # will be to leverage environment and approvers
@@ -81,21 +71,21 @@ jobs:
 
       # This steps is needed only if running the deployment multiple times
       # if the VM exists already the cloudinit failed the deployment
-      - name: Delete Jumpbox if exists
-        run: |
-          $vmCheck = az vm list --query "[?name=='jumpbox']" | ConvertFrom-Json
-          $vmExists = $vmCheck.Length -gt 0
-          if ($vmExists) {            
-            az vm delete -g ${{ env.RESOURCE_GROUP_NAME }} -n jumpbox --yes
+      # - name: Delete Jumpbox if exists
+      #   run: |
+      #     $vmCheck = az vm list --query "[?name=='jumpbox']" | ConvertFrom-Json
+      #     $vmExists = $vmCheck.Length -gt 0
+      #     if ($vmExists) {            
+      #       az vm delete -g ${{ env.RESOURCE_GROUP_NAME }} -n jumpbox --yes
                         
-            $disks = az resource list -g ${{ env.RESOURCE_GROUP_NAME }} --resource-type 'Microsoft.Compute/disks' | ConvertFrom-Json
+      #       $disks = az resource list -g ${{ env.RESOURCE_GROUP_NAME }} --resource-type 'Microsoft.Compute/disks' | ConvertFrom-Json
 
-            foreach ($disk in $disks) {
-              az resource delete --resource-group ${{ env.RESOURCE_GROUP_NAME }} --name $disk.name --resource-type $disk.type
-            }
+      #       foreach ($disk in $disks) {
+      #         az resource delete --resource-group ${{ env.RESOURCE_GROUP_NAME }} --name $disk.name --resource-type $disk.type
+      #       }
 
-          }
-        shell: pwsh
+      #     }
+      #   shell: pwsh
 
       - name: Deploy Azure Resources
         id: armDeployment
@@ -106,11 +96,16 @@ jobs:
           template: ./bicep/main.json
           parameters: ./bicep/main.parameters.json     
 
-      - name: Add jumpbox A record
+      - name: Echo private IP
         run: |
-          $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json
-          az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n jumpbox -a ${{ steps.armDeployment.outputs.jumpboxPrivateIP }}
+          Write-Output ${{ steps.armDeployment.outputs.runnersInfo }}
         shell: pwsh
+
+      # - name: Add jumpbox A record
+      #   run: |
+      #     $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json          
+      #     az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n jumpbox -a ${{ steps.armDeployment.outputs.jumpboxPrivateIP }}
+      #   shell: pwsh
 
       - uses: gliech/create-github-secret-action@v1
         name: Write ACR registry name in secrets

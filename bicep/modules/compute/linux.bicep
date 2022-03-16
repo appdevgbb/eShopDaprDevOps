@@ -11,8 +11,10 @@ param adminPassword string
 
 param subnetId string
 
-resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
-  name: 'pip-jumpbox'
+var numberOfSelfRunners = 2
+
+resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(1, numberOfSelfRunners): {
+  name: 'pip-runner-${i}'
   location: location
   sku: {
     name: 'Basic'
@@ -21,31 +23,31 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
     publicIPAllocationMethod: 'Dynamic'
     publicIPAddressVersion: 'IPv4'
   }
-}
+}]
 
-resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
-  name: 'nic-jumpbox'
+resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(1, numberOfSelfRunners): {
+  name: 'nic-runner-${i}'
   location: location
   properties: {
     ipConfigurations: [
       {
-        name: 'ipconfig-jumpbox'
+        name: 'ipconfig-runner'
         properties: {
           subnet: {
             id: subnetId
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: pip.id
+            id: pip[i].id
           }
         }
       }
     ]
   }
-}
+}]
 
-resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
-  name: 'jumpbox'
+resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(1, numberOfSelfRunners): {
+  name: 'runner-${i}'
   location: location
   identity: {
     type: 'SystemAssigned'
@@ -71,7 +73,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
     networkProfile: {
       networkInterfaces: [
         {
-          id: nic.id
+          id: nic[i].id
         }
       ]
     }
@@ -92,9 +94,11 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
       }
     }
   }
-}
+}]
 
 
-output vmName string = vm.name
-output privateIp string = nic.properties.ipConfigurations[0].properties.privateIPAddress
-output jumpboxname string = vm.name
+output runnerVmInfo array = [for i in range(1, numberOfSelfRunners): {
+  vmName: vm[i].name
+  privateIp: nic[i].properties.ipConfigurations[0].properties.privateIPAddress
+  jumpboxname: vm[i].name
+}]

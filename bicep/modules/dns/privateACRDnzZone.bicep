@@ -3,8 +3,7 @@ param vnetName string
 param location string
 param subnetId string
 param privateLinkResourceId string
-param jumpboxPrivateIP string
-param jumpboxname string
+param runnerVms array
 
 var privateEndpointName = 'pe-acr'
 
@@ -13,17 +12,17 @@ resource privateAcrDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   location: 'global'
 }
 
-resource aRecordJumpbox 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
-  name: '${privateAcrDnsZone.name}/${jumpboxname}'
+resource aRecordJumpbox 'Microsoft.Network/privateDnsZones/A@2020-06-01' = [for runner in runnerVms: {
+  name: '${privateAcrDnsZone.name}/${runner.jumpboxname}'
   properties: {
     ttl: 3600
     aRecords: [
       {
-        ipv4Address: jumpboxPrivateIP
+        ipv4Address: runner.jumpboxPrivateIP
       }
     ]
   }
-}
+}]
 
 resource vnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
   name: '${privateAcrDnsZone.name}/link_to_${toLower(vnetName)}'
