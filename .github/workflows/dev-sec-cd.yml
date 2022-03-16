@@ -69,24 +69,6 @@ jobs:
         run: |
           az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
 
-      # This steps is needed only if running the deployment multiple times
-      # if the VM exists already the cloudinit failed the deployment
-      # - name: Delete Jumpbox if exists
-      #   run: |
-      #     $vmCheck = az vm list --query "[?name=='jumpbox']" | ConvertFrom-Json
-      #     $vmExists = $vmCheck.Length -gt 0
-      #     if ($vmExists) {            
-      #       az vm delete -g ${{ env.RESOURCE_GROUP_NAME }} -n jumpbox --yes
-                        
-      #       $disks = az resource list -g ${{ env.RESOURCE_GROUP_NAME }} --resource-type 'Microsoft.Compute/disks' | ConvertFrom-Json
-
-      #       foreach ($disk in $disks) {
-      #         az resource delete --resource-group ${{ env.RESOURCE_GROUP_NAME }} --name $disk.name --resource-type $disk.type
-      #       }
-
-      #     }
-      #   shell: pwsh
-
       - name: Deploy Azure Resources
         id: armDeployment
         uses: azure/arm-deploy@v1
@@ -101,6 +83,7 @@ jobs:
           Write-Output ${{ steps.armDeployment.outputs.runnersInfo }}
         shell: pwsh
 
+      # TODO 
       # - name: Add jumpbox A record
       #   run: |
       #     $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json          

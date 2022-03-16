@@ -49,6 +49,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(
 resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(0, numberOfSelfRunners): {
   name: 'runner-${i}'
   location: location
+  tags: {
+    'aks-dev-secops': 'runner'
+  }
   identity: {
     type: 'SystemAssigned'
   }
