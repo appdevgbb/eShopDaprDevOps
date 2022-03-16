@@ -18,7 +18,7 @@ resource aRecordJumpbox 'Microsoft.Network/privateDnsZones/A@2020-06-01' = [for 
     ttl: 3600
     aRecords: [
       {
-        ipv4Address: runner.jumpboxPrivateIP
+        ipv4Address: runner.privateIp
       }
     ]
   }
