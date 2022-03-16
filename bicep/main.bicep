@@ -2,19 +2,13 @@
 param location string
 
 @description('The settings of the virtual network')
-param vnetSettings object = {
-  addressPrefixe: '10.0.0.0/8'  
-  subnets: [
-    {
-      name: 'snet-aks'
-      addressPrefix: '10.0.0.0/16'
-    }
-    {
-      name: 'snet-jumpbox'
-      addressPrefix: '10.0.0.0/27'
-    }
-  ]
-}
+param vnetSettings object
+
+@description('The number of node count in the system pool')
+param systemPoolNodeCount int
+
+@description('The number of node count in the workload pool')
+param workloadNodeCount int
 
 @description('The username of the admin of the VM')
 @secure()

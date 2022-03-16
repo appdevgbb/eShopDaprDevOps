@@ -51,6 +51,12 @@
         },
         "adminSqlPassword": {
           "value": "__adminSqlPassword__"          
-        }        
+        },
+        "systemPoolNodeCount": {
+          "value": "1"
+        },
+        "workloadNodeCount": {
+          "value": "1"
+        }
     }
 }

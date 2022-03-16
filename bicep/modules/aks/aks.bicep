@@ -5,9 +5,11 @@ param aksAzureCniSettings object
 param identityAKS object
 param workspaceId string
 
+param systemPoolNodeCount int
+param workloadNodeCount int
+
 var kubernetesVersion = '1.22.6'
 var aksName = 'aksdevops'
-
 
 resource aks 'Microsoft.ContainerService/managedClusters@2021-10-01' = {
   name: aksName
@@ -24,7 +26,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-10-01' = {
       {
         name: 'systempool'
         osDiskSizeGB: 0
-        count: 2
+        count: systemPoolNodeCount
         enableAutoScaling: false
         vmSize: 'Standard_DS2_v2'
         osType: 'Linux'        
@@ -37,7 +39,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-10-01' = {
       {
         name: 'workloadpool'
         osDiskSizeGB: 0
-        count: 3
+        count: workloadNodeCount
         enableAutoScaling: true
         minCount: 1
         maxCount: 5
