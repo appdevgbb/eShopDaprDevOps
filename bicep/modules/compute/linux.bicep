@@ -13,7 +13,7 @@ param subnetId string
 
 var numberOfSelfRunners = 2
 
-resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(1, numberOfSelfRunners): {
+resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(0, numberOfSelfRunners): {
   name: 'pip-runner-${i}'
   location: location
   sku: {
@@ -25,7 +25,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(
   }
 }]
 
-resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(1, numberOfSelfRunners): {
+resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(0, numberOfSelfRunners): {
   name: 'nic-runner-${i}'
   location: location
   properties: {
@@ -46,7 +46,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(
   }
 }]
 
-resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(1, numberOfSelfRunners): {
+resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(0, numberOfSelfRunners): {
   name: 'runner-${i}'
   location: location
   identity: {
@@ -97,7 +97,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(1, 
 }]
 
 
-output runnerVmInfo array = [for i in range(1, numberOfSelfRunners): {
+output runnerVmInfo array = [for i in range(0, numberOfSelfRunners): {
   vmName: vm[i].name
   privateIp: nic[i].properties.ipConfigurations[0].properties.privateIPAddress
   jumpboxname: vm[i].name
