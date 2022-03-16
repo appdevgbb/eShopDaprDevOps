@@ -49,61 +49,61 @@ module vnet 'modules/network/vnet.bicep' = {
   }
 }
 
-module acr 'modules/acr/registry.bicep' = {
-  name: 'acr'
-  params: {
-    location: location
-    suffix: suffix
-  }
-}
+// module acr 'modules/acr/registry.bicep' = {
+//   name: 'acr'
+//   params: {
+//     location: location
+//     suffix: suffix
+//   }
+// }
 
-module selfRunners 'modules/compute/linux.bicep' = {
-  name: 'selfRunners'
-  params: {
-    location: location    
-    subnetId: vnet.outputs.jumpboxSubnetId
-    adminPassword: adminPassword
-    adminUsername: adminUsername
-    ubuntuVersion: ubuntuVersion
-    vmSize: vmSize    
-  }
-}
+// module selfRunners 'modules/compute/linux.bicep' = {
+//   name: 'selfRunners'
+//   params: {
+//     location: location    
+//     subnetId: vnet.outputs.jumpboxSubnetId
+//     adminPassword: adminPassword
+//     adminUsername: adminUsername
+//     ubuntuVersion: ubuntuVersion
+//     vmSize: vmSize    
+//   }
+// }
 
-module privateZoneAcr 'modules/dns/privateACRDnzZone.bicep' = {
-  name: 'privateZoneAcr'
-  params: {
-    location: location
-    vnetName: vnet.outputs.virtualNetworkName
-    privateLinkResourceId: acr.outputs.acrId
-    subnetId: vnet.outputs.prvEndpointSubnetId
-    vnetId: vnet.outputs.vnetId
-    runnerVms: selfRunners.outputs.runnerVmInfo
-  }
-}
+// module privateZoneAcr 'modules/dns/privateACRDnzZone.bicep' = {
+//   name: 'privateZoneAcr'
+//   params: {
+//     location: location
+//     vnetName: vnet.outputs.virtualNetworkName
+//     privateLinkResourceId: acr.outputs.acrId
+//     subnetId: vnet.outputs.prvEndpointSubnetId
+//     vnetId: vnet.outputs.vnetId
+//     runnerVms: selfRunners.outputs.runnerVmInfo
+//   }
+// }
 
-module storage 'modules/storage/storage.bicep' = {
-  name: 'storage'
-  params: {
-    location: location
-    suffix: suffix
-  }
-}
+// module storage 'modules/storage/storage.bicep' = {
+//   name: 'storage'
+//   params: {
+//     location: location
+//     suffix: suffix
+//   }
+// }
 
-module workspace 'modules/workspace/workspace.bicep' = {
-  name: 'workspace'
-  params: {
-    location: location
-    suffix: suffix
-  }
-}
+// module workspace 'modules/workspace/workspace.bicep' = {
+//   name: 'workspace'
+//   params: {
+//     location: location
+//     suffix: suffix
+//   }
+// }
 
-module identityAks 'modules/identity/userassigned.identity.bicep' = {
-  name: 'identityAks'
-  params: {
-    location: location
-    name: 'aks-identity'
-  }
-}
+// module identityAks 'modules/identity/userassigned.identity.bicep' = {
+//   name: 'identityAks'
+//   params: {
+//     location: location
+//     name: 'aks-identity'
+//   }
+// }
 
 module networkContributorRole 'modules/identity/role.bicep' = {
   name: 'networkContributorRole'
@@ -115,50 +115,50 @@ module networkContributorRole 'modules/identity/role.bicep' = {
   }
 }
 
-module aks 'modules/aks/aks.bicep' = {
-  name: 'aks'
-  dependsOn: [
-    networkContributorRole
-  ]
-  params: {
-    aadAdminGroupId: aadAdminGroupId
-    aksAzureCniSettings: aksAzureCniSettings
-    location: location
-    subnetId: vnet.outputs.aksSubnetId
-    identityAKS: {
-      '${identityAks.outputs.identityId}': {}
-    }
-    workspaceId: workspace.outputs.workSpaceId
-    systemPoolNodeCount: systemPoolNodeCount
-    workloadNodeCount: workloadNodeCount
-  }
-}
+// module aks 'modules/aks/aks.bicep' = {
+//   name: 'aks'
+//   dependsOn: [
+//     networkContributorRole
+//   ]
+//   params: {
+//     aadAdminGroupId: aadAdminGroupId
+//     aksAzureCniSettings: aksAzureCniSettings
+//     location: location
+//     subnetId: vnet.outputs.aksSubnetId
+//     identityAKS: {
+//       '${identityAks.outputs.identityId}': {}
+//     }
+//     workspaceId: workspace.outputs.workSpaceId
+//     systemPoolNodeCount: systemPoolNodeCount
+//     workloadNodeCount: workloadNodeCount
+//   }
+// }
 
-module redis 'modules/redis/redis.bicep' = {
-  name: 'redis'
-  params: {
-    location: location
-    suffix: suffix
-  }
-}
+// module redis 'modules/redis/redis.bicep' = {
+//   name: 'redis'
+//   params: {
+//     location: location
+//     suffix: suffix
+//   }
+// }
 
-module servicebus 'modules/servicebus/servicebus.bicep' = {
-  name: 'servicebus'
-  params: {
-    location: location
-    suffix: suffix
-  }
-}
+// module servicebus 'modules/servicebus/servicebus.bicep' = {
+//   name: 'servicebus'
+//   params: {
+//     location: location
+//     suffix: suffix
+//   }
+// }
 
-module sql 'modules/sql/sql.bicep' = {
-  name: 'sql'
-  params: {
-    administratorLogin: adminSqlUsername
-    administratorLoginPassword: adminSqlPassword
-    location: location
-  }
-}
+// module sql 'modules/sql/sql.bicep' = {
+//   name: 'sql'
+//   params: {
+//     administratorLogin: adminSqlUsername
+//     administratorLoginPassword: adminSqlPassword
+//     location: location
+//   }
+// }
 
-output arcName string = acr.outputs.acrName
-output aksRgName string = aksInfraResourceGroupName
-output aksName string = aks.outputs.clusterName
+// output arcName string = acr.outputs.acrName
+// output aksRgName string = aksInfraResourceGroupName
+// output aksName string = aks.outputs.clusterName
