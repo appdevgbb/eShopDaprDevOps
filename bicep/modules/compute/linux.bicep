@@ -81,7 +81,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(0, 
       ]
     }
     osProfile: {
-      computerName: 'jumpbox'
+      computerName: 'runner-${i}'
       adminUsername: adminUsername
       adminPassword: adminPassword
       linuxConfiguration: {        
