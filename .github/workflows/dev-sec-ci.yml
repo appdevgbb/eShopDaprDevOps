@@ -64,9 +64,10 @@ jobs:
     #     args: --sarif-file-output=snyk.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
 
     - name: Upload result to GitHub Code Scanning Alerts
+      if: always() # To be sure the sarif file is always uploaded
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: snyksca.sarif
+        sarif_file: snykcode.sarif
 
   container-scan:
     runs-on: self-hosted
