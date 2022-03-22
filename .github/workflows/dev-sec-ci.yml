@@ -50,10 +50,10 @@ jobs:
         cd ${{ inputs.projectPath }}
         dotnet build --no-restore
 
-    - name: Run Synk SCA Test
-      run: |
-       snyk auth ${{ secrets.SNYK_TOKEN }}
-       snyk code test --sarif-file-output=snykcode.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
+    # - name: Run Synk SCA Test
+    #   run: |
+    #    snyk auth ${{ secrets.SNYK_TOKEN }}
+    #    snyk code test --sarif-file-output=snykcode.sarif --file=${{ inputs.projectPath }}/obj/project.assets.json --severity-threshold=low
 
     - name: Run Synk SCA Test
       run: |
