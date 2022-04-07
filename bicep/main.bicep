@@ -36,6 +36,9 @@ param adminSqlUsername string
 @secure()
 param adminSqlPassword string
 
+@description('Switch if you are not running the data storage locally in the AKS cluster')
+param azureResourceSwitch bool = false
+
 var suffix = uniqueString(resourceGroup().id)
 var aksInfraResourceGroupName =  'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
 var networkContributorRoleId = resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
@@ -81,7 +84,7 @@ module privateZoneAcr 'modules/dns/privateACRDnzZone.bicep' = {
   }
 }
 
-module storage 'modules/storage/storage.bicep' = {
+module storage 'modules/storage/storage.bicep' = if (azureResourceSwitch) {
   name: 'storage'
   params: {
     location: location
@@ -134,7 +137,7 @@ module aks 'modules/aks/aks.bicep' = {
   }
 }
 
-module redis 'modules/redis/redis.bicep' = {
+module redis 'modules/redis/redis.bicep' = if (azureResourceSwitch) {
   name: 'redis'
   params: {
     location: location
@@ -142,7 +145,7 @@ module redis 'modules/redis/redis.bicep' = {
   }
 }
 
-module servicebus 'modules/servicebus/servicebus.bicep' = {
+module servicebus 'modules/servicebus/servicebus.bicep' = if (azureResourceSwitch) {
   name: 'servicebus'
   params: {
     location: location
@@ -150,7 +153,7 @@ module servicebus 'modules/servicebus/servicebus.bicep' = {
   }
 }
 
-module sql 'modules/sql/sql.bicep' = {
+module sql 'modules/sql/sql.bicep' = if (azureResourceSwitch) {
   name: 'sql'
   params: {
     administratorLogin: adminSqlUsername

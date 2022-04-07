@@ -50,7 +50,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i in range(0, 
   name: 'runner-${i}'
   location: location
   tags: {
-    'aks-dev-secops': 'runner'
+    'Lifecycle': 'runner'
   }
   identity: {
     type: 'SystemAssigned'
