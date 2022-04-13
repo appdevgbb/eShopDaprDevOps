@@ -40,21 +40,23 @@ param adminSqlPassword string
 param azureResourceSwitch bool = false
 
 @description('If the VNET already exist (run more than once the pipeline)')
-param existingVNET bool
+param existingVNET string
 
 var suffix = uniqueString(resourceGroup().id)
 var aksInfraResourceGroupName =  'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
 var networkContributorRoleId = resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
 
-var vnetName = 'vnet-aks-${suffix}'
-var vnetId = existingVNET ? existingVnet.outputs.vnetId : vnet.outputs.vnetId 
-var virtualNetworkName = existingVNET ? existingVnet.outputs.virtualNetworkName : vnet.outputs.virtualNetworkName
-var jumpboxSubnetId = existingVNET ? existingVnet.outputs.jumpboxSubnetId : vnet.outputs.jumpboxSubnetId
-var prvEndpointSubnetId = existingVNET ? existingVnet.outputs.prvEndpointSubnetId : vnet.outputs.prvEndpointSubnetId
-var aksSubnetName = existingVNET ? existingVnet.outputs.aksSubnetName : vnet.outputs.aksSubnetName
-var aksSubnetId = existingVNET ? existingVnet.outputs.aksSubnetId : vnet.outputs.aksSubnetId
+var switchVnet = existingVNET == 'true' ? true : false
 
-module vnet 'modules/network/vnet.bicep' = if (existingVNET == false) {
+var vnetName = 'vnet-aks-${suffix}'
+var vnetId = switchVnet ? existingVnet.outputs.vnetId : vnet.outputs.vnetId 
+var virtualNetworkName = switchVnet ? existingVnet.outputs.virtualNetworkName : vnet.outputs.virtualNetworkName
+var jumpboxSubnetId = switchVnet ? existingVnet.outputs.jumpboxSubnetId : vnet.outputs.jumpboxSubnetId
+var prvEndpointSubnetId = switchVnet ? existingVnet.outputs.prvEndpointSubnetId : vnet.outputs.prvEndpointSubnetId
+var aksSubnetName = switchVnet ? existingVnet.outputs.aksSubnetName : vnet.outputs.aksSubnetName
+var aksSubnetId = switchVnet ? existingVnet.outputs.aksSubnetId : vnet.outputs.aksSubnetId
+
+module vnet 'modules/network/vnet.bicep' = if (switchVnet == false) {
   name: 'vnet'
   params: {
     location: location 
@@ -64,7 +66,7 @@ module vnet 'modules/network/vnet.bicep' = if (existingVNET == false) {
   }
 }
 
-module existingVnet 'modules/network/existingVnet.bicep' = if (existingVNET) {
+module existingVnet 'modules/network/existingVnet.bicep' = if (switchVnet) {
   name: 'existingVnet'
   params: {
     vnetName: vnetName
