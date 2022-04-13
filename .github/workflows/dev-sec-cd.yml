@@ -65,9 +65,9 @@ jobs:
        
       # See the change to be deployed, a good practice
       # will be to leverage environment and approvers
-      - name: what-if
-        run: |
-          az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
+      # - name: what-if
+      #   run: |
+      #     az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
 
       # We validate if the subnet is already there
       # this is usefull if you run the pipeline multiple time
