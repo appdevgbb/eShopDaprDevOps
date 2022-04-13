@@ -93,7 +93,7 @@ jobs:
           subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
           template: ./bicep/main.json
-          parameters: ./bicep/main.parameters.json     
+          parameters: ./bicep/main.parameters.json existingVNET=${{ env.EXISTING_VNET }}  
       
       - name: Add jumpbox A record
         run: |
