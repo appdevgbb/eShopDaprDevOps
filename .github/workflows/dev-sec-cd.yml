@@ -86,7 +86,7 @@ jobs:
           foreach ($nic in $nics)
           {
             foreach ($vm in $vms) {
-              if ($nic.Name eq $vm.Name) {
+              if ($nic.Name -eq $vm.Name) {
                 az network private-dns record-set a add-record -g ${{ env.RESOURCE_GROUP_NAME }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
               }
             }
