@@ -78,44 +78,27 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
-
-    - name: Build container image
+    - name: What is the user
       run: |
-        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+        echo $USER
+  #   - name: Build container image
+  #     run: |
+  #       sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
 
-   # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
-    - name: Run Trivy and Dockle container scan
-      uses: Azure/container-scan@v0 
-      id: container-scan
-      continue-on-error: true # In real life scenarios you would have this set to false
-      with:
-        image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
-        run-quality-checks: true
+  #  # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
+  #   - name: Run Trivy and Dockle container scan
+  #     uses: Azure/container-scan@v0 
+  #     id: container-scan
+  #     continue-on-error: true # In real life scenarios you would have this set to false
+  #     with:
+  #       image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
+  #       run-quality-checks: true
 
-    - uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-
-
-
-    # - run: |
-    #     docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
-    #     docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
-
-    # - name: Push Image to ACR
-    #   run: |
-    #     sudo az acr login -n ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-    #     sudo docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} 
-
-    #  Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
-    # - name: Publish Trivy and Dockle logs to AppInsights
-    #   uses: Azure/publish-security-assessments@v0
-    #   with: 
-    #     scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
-    #     connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
-    #     subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}      
+  #   - uses: azure/docker-login@v1
+  #     with:
+  #       login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+  #       username: ${{ secrets.REGISTRY_USERNAME }}
+  #       password: ${{ secrets.REGISTRY_PASSWORD }}
 
   # cred-scan:
   #   runs-on: windows-latest
