@@ -30,48 +30,48 @@ env:
   DOTNET_VERSION: 6.0.x
 
 jobs:
-  code-dep-scan:
-    runs-on: self-hosted
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+  # code-dep-scan:
+  #   runs-on: self-hosted
+  #   steps:
+  #   - name: Checkout repo
+  #     uses: actions/checkout@v2
 
-    - name: Install Snyk
-      uses: snyk/actions/setup@master
+  #   - name: Install Snyk
+  #     uses: snyk/actions/setup@master
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+  #   - name: Setup dotnet
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Build project
-      run: |
-        dotnet restore ${{ inputs.projectPath }}/${{ inputs.projectName }}
-        cd ${{ inputs.projectPath }}
-        dotnet build --no-restore
+  #   - name: Build project
+  #     run: |
+  #       dotnet restore ${{ inputs.projectPath }}/${{ inputs.projectName }}
+  #       cd ${{ inputs.projectPath }}
+  #       dotnet build --no-restore
 
-    - name: Find security issues using static code analysis
-      run: |
-       snyk auth ${{ secrets.SNYK_TOKEN }}
-       snyk code test --sarif-file-output=snykcode.sarif --severity-threshold=low ${{ inputs.projectPath }}
+  #   - name: Find security issues using static code analysis
+  #     run: |
+  #      snyk auth ${{ secrets.SNYK_TOKEN }}
+  #      snyk code test --sarif-file-output=snykcode.sarif --severity-threshold=low ${{ inputs.projectPath }}
 
-    - name: Test a project for open source vulnerabilities and license issues.
-      if: always() # To be sure the sarif file is always uploaded
-      run: |
-       snyk auth ${{ secrets.SNYK_TOKEN }}
-       snyk test --sarif-file-output=snyktest.sarif --severity-threshold=low ${{ inputs.projectPath }}
+  #   - name: Test a project for open source vulnerabilities and license issues.
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     run: |
+  #      snyk auth ${{ secrets.SNYK_TOKEN }}
+  #      snyk test --sarif-file-output=snyktest.sarif --severity-threshold=low ${{ inputs.projectPath }}
 
-    - name: Upload result to GitHub Code Scanning Alerts for static code analysis
-      if: always() # To be sure the sarif file is always uploaded
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snykcode.sarif
+  #   - name: Upload result to GitHub Code Scanning Alerts for static code analysis
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     uses: github/codeql-action/upload-sarif@v1
+  #     with:
+  #       sarif_file: snykcode.sarif
 
-    - name: Upload result to GitHub Code Scanning Alerts for open source vulnerabilities
-      if: always() # To be sure the sarif file is always uploaded
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyktest.sarif
+  #   - name: Upload result to GitHub Code Scanning Alerts for open source vulnerabilities
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     uses: github/codeql-action/upload-sarif@v1
+  #     with:
+  #       sarif_file: snyktest.sarif
 
   container-scan:
     runs-on: self-hosted
@@ -79,9 +79,15 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
-    - name: Build container image
-      run: |
-        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+    # - name: Build container image
+    #   run: |
+    #     sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
     # - name: Run Trivy and Dockle container scan
@@ -92,10 +98,14 @@ jobs:
     #     image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
     #     run-quality-checks: true
 
-    - name: Push Image to ACR
-      run: |
-        sudo az acr login -n ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-        sudo docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} 
+    - run: |
+        docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
+
+    # - name: Push Image to ACR
+    #   run: |
+    #     sudo az acr login -n ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+    #     sudo docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} 
 
     #  Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
     # - name: Publish Trivy and Dockle logs to AppInsights
@@ -105,33 +115,33 @@ jobs:
     #     connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
     #     subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}      
 
-  cred-scan:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+  # cred-scan:
+  #   runs-on: windows-latest
+  #   steps:
+  #   - name: Checkout repo
+  #     uses: actions/checkout@v2
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: |
-          5.0.x
-          6.0.x
-          3.1.x
+  #   - name: Setup dotnet
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: |
+  #         5.0.x
+  #         6.0.x
+  #         3.1.x
 
-    - name: Run Microsoft Security DevOps Analysis
-      uses: microsoft/security-devops-action@preview
-      id: msdo
-      with:
-        policy: microsoft
+  #   - name: Run Microsoft Security DevOps Analysis
+  #     uses: microsoft/security-devops-action@preview
+  #     id: msdo
+  #     with:
+  #       policy: microsoft
 
-    - name: Upload result to GitHub Code Scanning Alerts
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+  #   - name: Upload result to GitHub Code Scanning Alerts
+  #     uses: github/codeql-action/upload-sarif@v1
+  #     with:
+  #       sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-    - name: Upload alerts file as workflow artifact
-      uses: actions/upload-artifact@v3
-      with:  
-        name: alerts
-        path: ${{ steps.msdo.outputs.sarifFile }}
+  #   - name: Upload alerts file as workflow artifact
+  #     uses: actions/upload-artifact@v3
+  #     with:  
+  #       name: alerts
+  #       path: ${{ steps.msdo.outputs.sarifFile }}

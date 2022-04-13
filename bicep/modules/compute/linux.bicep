@@ -26,7 +26,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(
 }]
 
 resource nic 'Microsoft.Network/networkInterfaces@2021-05-01' = [for i in range(0, numberOfSelfRunners): {
-  name: 'nic-runner-${i}'
+  name: 'runner-${i}'
   location: location
   properties: {
     ipConfigurations: [
