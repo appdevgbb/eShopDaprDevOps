@@ -80,13 +80,13 @@ jobs:
           } else {
             echo "EXISTING_VNET=false" >> $GITHUB_ENV
           }
-        
+        shell: pwsh
 
       - name: Print env variable
         run: |
           echo ${{ env.EXISTING_VNET }}
         shell: pwsh
-        
+
       # - name: Deploy Azure Resources
       #   id: armDeployment
       #   uses: azure/arm-deploy@v1
