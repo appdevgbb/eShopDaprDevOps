@@ -39,40 +39,18 @@ param adminSqlPassword string
 @description('Switch if you are not running the data storage locally in the AKS cluster')
 param azureResourceSwitch bool = false
 
-@description('If the VNET already exist (run more than once the pipeline)')
-param existingVNET string
-
 var suffix = uniqueString(resourceGroup().id)
 var aksInfraResourceGroupName =  'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
 var networkContributorRoleId = resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
 
-var switchVnet = existingVNET == 'true' ? true : false
-
-var vnetName = 'vnet-aks-${suffix}'
-var vnetId = switchVnet ? existingVnet.outputs.vnetId : vnet.outputs.vnetId 
-var virtualNetworkName = switchVnet ? existingVnet.outputs.virtualNetworkName : vnet.outputs.virtualNetworkName
-var jumpboxSubnetId = switchVnet ? existingVnet.outputs.jumpboxSubnetId : vnet.outputs.jumpboxSubnetId
-var prvEndpointSubnetId = switchVnet ? existingVnet.outputs.prvEndpointSubnetId : vnet.outputs.prvEndpointSubnetId
-var aksSubnetName = switchVnet ? existingVnet.outputs.aksSubnetName : vnet.outputs.aksSubnetName
-var aksSubnetId = switchVnet ? existingVnet.outputs.aksSubnetId : vnet.outputs.aksSubnetId
-
-module vnet 'modules/network/vnet.bicep' = if (switchVnet == false) {
+module vnet 'modules/network/vnet.bicep' = {
   name: 'vnet'
   params: {
     location: location 
     suffix: suffix
     vnetSettings: vnetSettings    
-    vnetName: vnetName
   }
 }
-
-module existingVnet 'modules/network/existingVnet.bicep' = if (switchVnet) {
-  name: 'existingVnet'
-  params: {
-    vnetName: vnetName
-  }
-}
-
 
 module acr 'modules/acr/registry.bicep' = {
   name: 'acr'
@@ -86,7 +64,7 @@ module selfRunners 'modules/compute/linux.bicep' = {
   name: 'selfRunners'
   params: {
     location: location    
-    subnetId: jumpboxSubnetId
+    subnetId: vnet.outputs.jumpboxSubnetId
     adminPassword: adminPassword
     adminUsername: adminUsername
     ubuntuVersion: ubuntuVersion
@@ -98,10 +76,10 @@ module privateZoneAcr 'modules/dns/privateACRDnzZone.bicep' = {
   name: 'privateZoneAcr'
   params: {
     location: location
-    vnetName: virtualNetworkName
+    vnetName: vnet.outputs.virtualNetworkName
     privateLinkResourceId: acr.outputs.acrId
-    subnetId: prvEndpointSubnetId
-    vnetId: vnetId
+    subnetId: vnet.outputs.prvEndpointSubnetId
+    vnetId: vnet.outputs.vnetId
     runnerVms: selfRunners.outputs.runnerVmInfo
   }
 }
@@ -135,8 +113,8 @@ module networkContributorRole 'modules/identity/role.bicep' = {
   params: {
     principalId: identityAks.outputs.principalId
     roleGuid: networkContributorRoleId
-    vnetName: virtualNetworkName
-    subnetName: aksSubnetName
+    vnetName: vnet.outputs.virtualNetworkName
+    subnetName: vnet.outputs.aksSubnetName
   }
 }
 
@@ -149,7 +127,7 @@ module aks 'modules/aks/aks.bicep' = {
     aadAdminGroupId: aadAdminGroupId
     aksAzureCniSettings: aksAzureCniSettings
     location: location
-    subnetId: aksSubnetId
+    subnetId: vnet.outputs.aksSubnetId
     identityAKS: {
       '${identityAks.outputs.identityId}': {}
     }
