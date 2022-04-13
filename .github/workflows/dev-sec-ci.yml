@@ -79,9 +79,18 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
-    # - name: Build container image
-    #   run: |
-    #     sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+    - name: Build container image
+      run: |
+        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+
+   # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
+    - name: Run Trivy and Dockle container scan
+      uses: Azure/container-scan@v0 
+      id: container-scan
+      continue-on-error: true # In real life scenarios you would have this set to false
+      with:
+        image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
+        run-quality-checks: true
 
     - uses: azure/docker-login@v1
       with:
@@ -89,18 +98,11 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
-    # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
-    # - name: Run Trivy and Dockle container scan
-    #   uses: Azure/container-scan@v0 
-    #   id: container-scan
-    #   continue-on-error: true # In real life scenarios you would have this set to false
-    #   with:
-    #     image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
-    #     run-quality-checks: true
 
-    - run: |
-        docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
-        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
+
+    # - run: |
+    #     docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+    #     docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
 
     # - name: Push Image to ACR
     #   run: |
