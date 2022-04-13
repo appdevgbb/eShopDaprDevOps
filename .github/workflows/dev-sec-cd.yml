@@ -21,91 +21,106 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}    
 
-      - name: Create Resource Group
-        run: |
-          az group create -n ${{ env.RESOURCE_GROUP_NAME }} -l ${{ env.LOCATION }} 
+      # - name: Create Resource Group
+      #   run: |
+      #     az group create -n ${{ env.RESOURCE_GROUP_NAME }} -l ${{ env.LOCATION }} 
 
-      # If any error is present the GH action will stop there
-      # this avoid to try to deploy the template for nothing
-      - name: Convert to ARM template
-        run: |
-          bicep build ./bicep/main.bicep  
+      # # If any error is present the GH action will stop there
+      # # this avoid to try to deploy the template for nothing
+      # - name: Convert to ARM template
+      #   run: |
+      #     bicep build ./bicep/main.bicep  
 
-      - name: Run Snyk to check bicep tmpl security
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the issues to GitHub Code Scanning
-        continue-on-error: true
-        uses: snyk/actions/iac@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          file: ./bicep/main.json
+      # - name: Run Snyk to check bicep tmpl security
+      #   # Snyk can be used to break the build when it detects security issues.
+      #   # In this case we want to upload the issues to GitHub Code Scanning
+      #   continue-on-error: true
+      #   uses: snyk/actions/iac@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     file: ./bicep/main.json
 
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: snyk.sarif  
+      # - name: Upload result to GitHub Code Scanning
+      #   uses: github/codeql-action/upload-sarif@v1
+      #   with:
+      #     sarif_file: snyk.sarif  
 
-      # TODO: Add in Run Microsoft Security DevOps Analysis action for Terrascan and ARM Template Analyzer  
+      # # TODO: Add in Run Microsoft Security DevOps Analysis action for Terrascan and ARM Template Analyzer  
 
-      # Replace parameter in parameter file
-      - name: Replace token parameters file
-        uses: cschleiden/replace-tokens@v1.0
-        with:        
-          tokenPrefix: __        
-          tokenSuffix: __        
-          files: '["bicep/main.parameters.json"]'
-        env:
-          location: ${{ env.LOCATION  }}
-          adminUsername: ${{ secrets.ADMIN_USERNAME }}
-          adminPassword: ${{ secrets.ADMIN_PASSWORD }}              
-          aadAdminGroupId: ${{ secrets.AAD_ADMIN_GROUP_ID }}
-          adminSqlUsername: ${{ secrets.ADMIN_SQL_USERNAME }}
-          adminSqlPassword: ${{ secrets.ADMIN_SQL_PASSWORD }} 
+      # # Replace parameter in parameter file
+      # - name: Replace token parameters file
+      #   uses: cschleiden/replace-tokens@v1.0
+      #   with:        
+      #     tokenPrefix: __        
+      #     tokenSuffix: __        
+      #     files: '["bicep/main.parameters.json"]'
+      #   env:
+      #     location: ${{ env.LOCATION  }}
+      #     adminUsername: ${{ secrets.ADMIN_USERNAME }}
+      #     adminPassword: ${{ secrets.ADMIN_PASSWORD }}              
+      #     aadAdminGroupId: ${{ secrets.AAD_ADMIN_GROUP_ID }}
+      #     adminSqlUsername: ${{ secrets.ADMIN_SQL_USERNAME }}
+      #     adminSqlPassword: ${{ secrets.ADMIN_SQL_PASSWORD }} 
 
-      # See the change to be deployed, a good practice
-      # will be to leverage environment and approvers
-      - name: what-if
-        run: |
-          az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
+      # # See the change to be deployed, a good practice
+      # # will be to leverage environment and approvers
+      # - name: what-if
+      #   run: |
+      #     az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
 
-      - name: Deploy Azure Resources
-        id: armDeployment
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
-          template: ./bicep/main.json
-          parameters: ./bicep/main.parameters.json
+      # - name: Deploy Azure Resources
+      #   id: armDeployment
+      #   uses: azure/arm-deploy@v1
+      #   with:
+      #     subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
+      #     template: ./bicep/main.json
+      #     parameters: ./bicep/main.parameters.json
       
+      # - name: Add jumpbox A record
+      #   run: |
+      #     $vms = az vm list -g ${{ env.RESOURCE_GROUP_NAME }} | ConvertFrom-Json
+      #     $nics = az network nic list -g ${{ env.RESOURCE_GROUP_NAME }} --query '[*].{Name:name,PrivateIpAddress:ipConfigurations[0].privateIpAddress,ResourceGroup:resourceGroup}' | ConvertFrom-Json
+      #     foreach ($nic in $nics)
+      #     {
+      #       foreach ($vm in $vms) {
+      #         if ($nic.Name -eq $vm.Name) {
+      #           $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json
+      #           az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
+      #         }
+      #       }
+      #     }          
+      #   shell: pwsh
+
       - name: Add jumpbox A record
         run: |
           $vms = az vm list -g ${{ env.RESOURCE_GROUP_NAME }} | ConvertFrom-Json
           $nics = az network nic list -g ${{ env.RESOURCE_GROUP_NAME }} --query '[*].{Name:name,PrivateIpAddress:ipConfigurations[0].privateIpAddress,ResourceGroup:resourceGroup}' | ConvertFrom-Json
+          $dns= az network private-dns zone list -g MC_rg-aks-devsecops_aksdevops_eastus | ConvertFrom-Json
           foreach ($nic in $nics)
           {
             foreach ($vm in $vms) {
-              if ($nic.Name -eq $vm.Name) {
-                $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json
-                az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
+              if ($nic.Name -eq 'nic-$vm.Name') {                
+                az network private-dns record-set a add-record -g MC_rg-aks-devsecops_aksdevops_eastus -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
               }
             }
           }          
         shell: pwsh
 
-      - uses: gliech/create-github-secret-action@v1
-        name: Write ACR registry name in secrets
-        with:
-          name: AZURE_CONTAINER_REGISTRY
-          value: ${{ steps.armDeployment.outputs.arcName }}
-          pa_token: ${{ secrets.PA_TOKEN }}          
+      # - uses: gliech/create-github-secret-action@v1
+      #   name: Write ACR registry name in secrets
+      #   with:
+      #     name: AZURE_CONTAINER_REGISTRY
+      #     value: ${{ steps.armDeployment.outputs.arcName }}
+      #     pa_token: ${{ secrets.PA_TOKEN }}          
 
-      - uses: gliech/create-github-secret-action@v1
-        name: Write AKS name in secrets
-        with:
-          name: AKS_NAME
-          value: ${{ steps.armDeployment.outputs.aksName }}
-          pa_token: ${{ secrets.PA_TOKEN }}    
+      # - uses: gliech/create-github-secret-action@v1
+      #   name: Write AKS name in secrets
+      #   with:
+      #     name: AKS_NAME
+      #     value: ${{ steps.armDeployment.outputs.aksName }}
+      #     pa_token: ${{ secrets.PA_TOKEN }}    
 
       - name: logout
         run: |
