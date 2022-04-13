@@ -74,18 +74,17 @@ jobs:
       # to avoid failing because of the private endpoint
       - name: Validate if VNET is already there
         run : |
-          $vnet = az vm list -g rg-aks-devsecops | ConvertFrom-Json
-          if ($vnet.Length -gt 0) {
-            echo "EXISTING_VNET=true" >> $GITHUB_ENV
-          } else {
+          vnet=$(az vm list -g ${{ env.RESOURCE_GROUP_NAME }})
+          if [ -z "$vnet" ]
+          then
             echo "EXISTING_VNET=false" >> $GITHUB_ENV
-          }
-        shell: pwsh
+          else
+            echo "EXISTING_VNET=true" >> $GITHUB_ENV
+          fi
 
       - name: Print env variable
         run: |
-          echo ${{ env.EXISTING_VNET }}
-        shell: pwsh
+          echo ${{ env.EXISTING_VNET }}        
 
       # - name: Deploy Azure Resources
       #   id: armDeployment
