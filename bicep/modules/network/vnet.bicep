@@ -1,8 +1,7 @@
 param location string
 param suffix string
 param vnetSettings object
-
-var vnetName = 'vnet-aks-${suffix}'
+param vnetName string
 
 resource nsgRunner 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: 'nsg-runner'
