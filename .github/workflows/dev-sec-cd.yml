@@ -99,7 +99,14 @@ jobs:
           name: AZURE_CONTAINER_REGISTRY
           value: ${{ steps.armDeployment.outputs.arcName }}
           pa_token: ${{ secrets.PA_TOKEN }}          
-      
+
+      - uses: gliech/create-github-secret-action@v1
+        name: Write AKS name in secrets
+        with:
+          name: AKS_NAME
+          value: ${{ steps.armDeployment.outputs.aksName }}
+          pa_token: ${{ secrets.PA_TOKEN }}    
+
       - name: logout
         run: |
           az logout                              

@@ -45,3 +45,6 @@ runcmd:
   # Adding current user (defined when creating the VM to the sudo group)
   # https://linuxize.com/post/how-to-add-user-to-sudoers-in-ubuntu/
   - echo "${USER}  ALL=(ALL) NOPASSWD:ALL" | sudo tee "/etc/sudoers.d/${USER}"
+
+  # Install Dapr CLI
+  - wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
