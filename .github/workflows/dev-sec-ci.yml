@@ -76,29 +76,28 @@ jobs:
   container-scan:
     runs-on: self-hosted
     steps:
+    
     - name: Checkout repo
       uses: actions/checkout@v2
-    - name: What is the user
+
+    - name: Build container image
       run: |
-        echo $USER
-  #   - name: Build container image
-  #     run: |
-  #       sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
 
-  #  # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
-  #   - name: Run Trivy and Dockle container scan
-  #     uses: Azure/container-scan@v0 
-  #     id: container-scan
-  #     continue-on-error: true # In real life scenarios you would have this set to false
-  #     with:
-  #       image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
-  #       run-quality-checks: true
+   # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
+    - name: Run Trivy and Dockle container scan
+      uses: Azure/container-scan@v0 
+      id: container-scan
+      continue-on-error: true # In real life scenarios you would have this set to false
+      with:
+        image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
+        run-quality-checks: true
 
-  #   - uses: azure/docker-login@v1
-  #     with:
-  #       login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
-  #       username: ${{ secrets.REGISTRY_USERNAME }}
-  #       password: ${{ secrets.REGISTRY_PASSWORD }}
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
   # cred-scan:
   #   runs-on: windows-latest

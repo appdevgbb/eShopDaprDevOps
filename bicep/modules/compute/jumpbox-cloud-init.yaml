@@ -35,12 +35,14 @@ runcmd:
   - sudo systemctl enable docker.service
   - sudo systemctl enable containerd.service
   # Creating new group docker
-  #- sudo groupadd docker
+  - sudo groupadd docker
   # Adding current user to the docker group (avoiding the user to run the sudo command when calling docker)
-  #- sudo usermod -aG docker $USER  
+  - sudo usermod -aG docker $USER  
   # Apply change of the docker group on the linux box
   # https://docs.docker.com/engine/install/linux-postinstall/
-  #- newgrp docker
+  - newgrp docker
+  # https://linuxhandbook.com/docker-permission-denied/
+  - sudo chown root:docker /var/run/docker.sock
 
   # Adding current user (defined when creating the VM to the sudo group)
   # https://linuxize.com/post/how-to-add-user-to-sudoers-in-ubuntu/
