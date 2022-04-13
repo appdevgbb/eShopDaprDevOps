@@ -69,36 +69,52 @@ jobs:
         run: |
           az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
 
-      - name: Deploy Azure Resources
-        id: armDeployment
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
-          template: ./bicep/main.json
-          parameters: ./bicep/main.parameters.json     
-      
-      - name: Add jumpbox A record
-        run: |
-          $vms = az vm list -g ${{ env.RESOURCE_GROUP_NAME }} | ConvertFrom-Json
-          $nics = az network nic list -g ${{ env.RESOURCE_GROUP_NAME }} --query '[*].{Name:name,PrivateIpAddress:ipConfigurations[0].privateIpAddress,ResourceGroup:resourceGroup}' | ConvertFrom-Json
-          foreach ($nic in $nics)
-          {
-            foreach ($vm in $vms) {
-              if ($nic.Name -eq $vm.Name) {
-                $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json                          
-                az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
-              }
-            }
-          }          
-        shell: pwsh
+      # We validate if the subnet is already there
+      # this is usefull if you run the pipeline multiple time
+      # to avoid failing because of the private endpoint
+      - name: Validate if VNET is already there
+        run : |
+          $vnet = az vm list -g rg-aks-devsecops | ConvertFrom-Json
+          if ($vnet.Length -gt 0) {
+            echo "EXISTING_VNET=true" >> $GITHUB_ENV
+          } else {
+            echo "EXISTING_VNET=false" >> $GITHUB_ENV
+          }
 
-      - uses: gliech/create-github-secret-action@v1
-        name: Write ACR registry name in secrets
-        with:
-          name: AZURE_CONTAINER_REGISTRY
-          value: ${{ steps.armDeployment.outputs.arcName }}
-          pa_token: ${{ secrets.PA_TOKEN }}          
+      - name: Print env variable
+        run: |
+          echo ${{ env.EXISTING_VNET }}
+
+      # - name: Deploy Azure Resources
+      #   id: armDeployment
+      #   uses: azure/arm-deploy@v1
+      #   with:
+      #     subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
+      #     template: ./bicep/main.json
+      #     parameters: ./bicep/main.parameters.json     
+      
+      # - name: Add jumpbox A record
+      #   run: |
+      #     $vms = az vm list -g ${{ env.RESOURCE_GROUP_NAME }} | ConvertFrom-Json
+      #     $nics = az network nic list -g ${{ env.RESOURCE_GROUP_NAME }} --query '[*].{Name:name,PrivateIpAddress:ipConfigurations[0].privateIpAddress,ResourceGroup:resourceGroup}' | ConvertFrom-Json
+      #     foreach ($nic in $nics)
+      #     {
+      #       foreach ($vm in $vms) {
+      #         if ($nic.Name -eq $vm.Name) {
+      #           $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json
+      #           az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
+      #         }
+      #       }
+      #     }          
+      #   shell: pwsh
+
+      # - uses: gliech/create-github-secret-action@v1
+      #   name: Write ACR registry name in secrets
+      #   with:
+      #     name: AZURE_CONTAINER_REGISTRY
+      #     value: ${{ steps.armDeployment.outputs.arcName }}
+      #     pa_token: ${{ secrets.PA_TOKEN }}          
       
       - name: logout
         run: |

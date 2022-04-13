@@ -39,6 +39,9 @@ param adminSqlPassword string
 @description('Switch if you are not running the data storage locally in the AKS cluster')
 param azureResourceSwitch bool = false
 
+@description('If the subnet already exist (run more than once the pipeline)')
+param existingSubnet bool
+
 var suffix = uniqueString(resourceGroup().id)
 var aksInfraResourceGroupName =  'MC_${resourceGroup().name}_${aks.outputs.clusterName}_${location}'
 var networkContributorRoleId = resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
