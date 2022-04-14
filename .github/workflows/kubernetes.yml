@@ -45,6 +45,6 @@ jobs:
 
     - name: Build Kustomize template
       run: |
-        k apply -k deploy/kustomize/shared --dry-run=client -oyaml > deploy/kustomize/shared/shared.yaml
+        kubectl apply -k deploy/kustomize/shared --dry-run=client -oyaml > deploy/kustomize/shared/shared.yaml
 
         
