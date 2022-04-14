@@ -33,4 +33,18 @@ jobs:
             dapr init -k --enable-ha=true --wait --timeout 600
           fi
 
+  # Deploy database, service bus etc.
+  deploy-shared-services:
+    runs-on: self-hosted
+    needs: create-namespace-eshop
+
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Build Kustomize template
+      run: |
+        k apply -k deploy/kustomize/shared --dry-run=client -oyaml > deploy/kustomize/shared/shared.yaml
+
         
