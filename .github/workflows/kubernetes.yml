@@ -1,0 +1,26 @@
+name: Configure Kubernetes
+
+on:
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP_NAME: rg-aks-devsecops
+  NAMESPACE: eshopondapr
+
+jobs:
+
+  create-namespace-eshop:
+    runs-on: self-hosted
+
+    steps:      
+      - uses: azure/aks-set-context@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          cluster-name: ${{ env.AKS_NAME }}
+          resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
+
+      # Create namespace if doesn't exist
+      - run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -          
+
+        
