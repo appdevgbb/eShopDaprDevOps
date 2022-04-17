@@ -2,10 +2,7 @@ name: Deploy Container
 
 on:
   workflow_call:
-    inputs:
-      resource_group_name:
-        required: true
-        type: string      
+    inputs:   
       kustomize-input-directory:
         required: true
         type: string
