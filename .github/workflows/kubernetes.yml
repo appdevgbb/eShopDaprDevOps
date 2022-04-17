@@ -8,35 +8,47 @@ env:
   NAMESPACE: eshopondapr
 
 jobs:
+  
+  configure-acr:
+    runs-on: self-hosted
 
-  # create-namespace-eshop:
-  #   runs-on: self-hosted
+    steps:
+      - name: Attach ACR
+        run: |
+          var=${{ secrets.AKS_NAME }}
+          replace=""
+          acrname=${var//.azurecr.io/$replace}
+          az aks update -n ${{ secrets.AKS_NAME }} --attach-acr $acrname
 
-  #   steps:      
-  #     - uses: azure/aks-set-context@v1
-  #       with:
-  #         creds: '${{ secrets.AZURE_CREDENTIALS }}'
-  #         cluster-name: ${{ secrets.AKS_NAME }}
-  #         resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
+  create-namespace-eshop:
+    runs-on: self-hosted
+    needs: configure-acr
 
-  #     # Create namespace if doesn't exist
-  #     - name: Create K8s Namespace
-  #       run: |
-  #         kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -
+    steps:      
+      - uses: azure/aks-set-context@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          cluster-name: ${{ secrets.AKS_NAME }}
+          resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
 
-  #     - name: Install Dapr
-  #       run: |
-  #         # Validate if Dapr is already installed
-  #         daprInstalled=$(kubectl get ns | grep dapr-system)
-  #         if [ -z "$daprInstalled" ]
-  #         then
-  #           dapr init -k --enable-ha=true --wait --timeout 600
-  #        fi
+      # Create namespace if doesn't exist
+      - name: Create K8s Namespace
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -
+
+      - name: Install Dapr
+        run: |
+          # Validate if Dapr is already installed
+          daprInstalled=$(kubectl get ns | grep dapr-system)
+          if [ -z "$daprInstalled" ]
+          then
+            dapr init -k --enable-ha=true --wait --timeout 600
+          fi
 
   # Deploy database, service bus etc.
   deploy-core-services:
     runs-on: self-hosted
-    #needs: create-namespace-eshop
+    needs: create-namespace-eshop
 
     steps:
 
@@ -66,7 +78,11 @@ jobs:
     - name: Upload result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: snyk.sarif        
+        sarif_file: snyk.sarif      
+    
+    - name: Deploy Core Service in Kubernetes
+      run: |
+        kubectl apply -f deploy/k8s/kustomize/core/base/core.yml
         
 
         
