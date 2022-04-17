@@ -53,9 +53,10 @@ jobs:
     # needs: create-namespace-eshop
     uses: ./.github/workflows/deploy-container-cd.yml    
     with:
+      resource_group_name: ${{ env.RESOURCE_GROUP_NAME }}
       kustomize-input-directory: deploy/k8s/kustomize/core/base
       kustomize-output-file: deploy/k8s/kustomize/core/base/core.yml
-    secrets:
+    secrets:      
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AKS_NAME: ${{ secrets.REGISTRY_USERNAME }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
