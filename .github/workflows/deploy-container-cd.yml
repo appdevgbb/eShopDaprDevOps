@@ -8,7 +8,14 @@ on:
         type: string
       kustomize-output-file:
         required: true
-        type: string        
+        type: string
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+      AKS_NAME:
+        required: true
+      SNYK_TOKEN:
+        required: true
 jobs:
   scan-kubernetes-manifest-file:
 
