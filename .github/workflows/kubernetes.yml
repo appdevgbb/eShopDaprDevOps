@@ -49,43 +49,49 @@ jobs:
           fi
 
   # Deploy database, service bus etc.
-  deploy-core-services:
-    runs-on: self-hosted
-    needs: create-namespace-eshop
+  deploy-core-services:  
+    uses: ./.github/workflows/deploy-container-cd.yml
+    with:
+      kustomize-input-directory: deploy/k8s/kustomize/core/base
+      kustomize-output-file: deploy/k8s/kustomize/core/base/core.yml
+      
+    # runs-on: self-hosted
+    # needs: create-namespace-eshop
 
-    steps:
+    # steps:
 
-    - name: Checkout repo
-      uses: actions/checkout@v2
+    # - name: Checkout repo
+    #   uses: actions/checkout@v2
 
     # Set the target Azure Kubernetes Service (AKS) cluster. 
-    - uses: azure/aks-set-context@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
-        cluster-name: ${{ secrets.AKS_NAME }}
-        resource-group: ${{ env.RESOURCE_GROUP_NAME }}
 
-    - name: Build Kustomize template
-      run: |        
-        kubectl apply -k deploy/k8s/kustomize/core/base --dry-run=client -oyaml > deploy/k8s/kustomize/core/base/core.yml
+    # - uses: azure/aks-set-context@v1
+    #   with:
+    #     creds: '${{ secrets.AZURE_CREDENTIALS }}'
+    #     cluster-name: ${{ secrets.AKS_NAME }}
+    #     resource-group: ${{ env.RESOURCE_GROUP_NAME }}
 
-    # Continue on error, this is for demo purpose
-    - name: Check configuration files for security issues with Snyk
-      continue-on-error: true
-      uses: snyk/actions/iac@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        file: deploy/k8s/kustomize/core/base/core.yml
+    # - name: Build Kustomize template
+    #   run: |        
+    #     kubectl apply -k deploy/k8s/kustomize/core/base --dry-run=client -oyaml > deploy/k8s/kustomize/core/base/core.yml
 
-    - name: Upload result to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyk.sarif      
+    # # Continue on error, this is for demo purpose
+    # - name: Check configuration files for security issues with Snyk
+    #   continue-on-error: true
+    #   uses: snyk/actions/iac@master
+    #   env:
+    #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    #   with:
+    #     file: deploy/k8s/kustomize/core/base/core.yml
+
+    # - name: Upload result to GitHub Code Scanning
+    #   uses: github/codeql-action/upload-sarif@v1
+    #   with:
+    #     sarif_file: snyk.sarif      
     
-    - name: Deploy Core Service in Kubernetes
-      run: |
-        kubectl apply -f deploy/k8s/kustomize/core/base/core.yml
+    # - name: Deploy Core Service in Kubernetes
+    #   run: |
+    #     kubectl apply -f deploy/k8s/kustomize/core/base/core.yml
         
 
         

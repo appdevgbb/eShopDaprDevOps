@@ -1,4 +1,48 @@
-name: DevSecOps CI
+name: Deploy Container
 
 on:
   workflow_call:
+    inputs:
+      kustomize-input-directory:
+        required: true
+        type: string
+      kustomize-output-file:
+        required: true
+        type: string        
+jobs:
+  scan-kubernetes-manifest-file:
+
+    runs-on: self-hosted
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    # Set the target Azure Kubernetes Service (AKS) cluster. 
+    - uses: azure/aks-set-context@v1
+      with:
+        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+        cluster-name: ${{ secrets.AKS_NAME }}
+        resource-group: ${{ env.RESOURCE_GROUP_NAME }}
+
+    - name: Build Kustomize template
+      run: |        
+        kubectl apply -k ${{ inputs.kustomize-input-directory }} --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
+
+    # Continue on error, this is for demo purpose
+    - name: Check configuration files for security issues with Snyk
+      continue-on-error: true
+      uses: snyk/actions/iac@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        file: ${{ inputs.kustomize-output-file }}
+
+    - name: Upload result to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif      
+    
+    - name: Deploy Core Service in Kubernetes
+      run: |
+        kubectl apply -f ${{ inputs.kustomize-output-file }}      
