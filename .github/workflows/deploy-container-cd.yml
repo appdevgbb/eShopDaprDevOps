@@ -33,7 +33,7 @@ jobs:
       with:
         creds: '${{ secrets.AZURE_CREDENTIALS }}'
         cluster-name: ${{ secrets.AKS_NAME }}
-        resource-group: ${{ env.resource_group_name }}
+        resource-group: ${{ inputs.resource_group_name }}
 
     - name: Build Kustomize template
       run: |        
