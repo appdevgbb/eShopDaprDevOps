@@ -49,8 +49,9 @@ jobs:
           fi
 
   # Deploy database, service bus etc.
-  deploy-core-services:  
-    uses: ./.github/workflows/deploy-container-cd.yml
+  deploy-core-services:     
+    needs: create-namespace-eshop
+    uses: ./.github/workflows/deploy-container-cd.yml    
     with:
       kustomize-input-directory: deploy/k8s/kustomize/core/base
       kustomize-output-file: deploy/k8s/kustomize/core/base/core.yml
