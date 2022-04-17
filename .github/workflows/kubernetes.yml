@@ -34,7 +34,7 @@ jobs:
           fi
 
   # Deploy database, service bus etc.
-  deploy-shared-services:
+  deploy-core-services:
     runs-on: self-hosted
     needs: create-namespace-eshop
 
@@ -44,7 +44,22 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build Kustomize template
-      run: |
-        kubectl apply -k deploy/kustomize/shared --dry-run=client -oyaml > deploy/kustomize/shared/shared.yaml
+      run: |        
+        kubectl apply -k deploy/k8s/kustomize/core/base --dry-run=client -oyaml > deploy/k8s/kustomize/core/base/core.yml
+
+    # Continue on error, this is for demo purpose
+    - name: Check configuration files for security issues with Snyk
+      continue-on-error: true
+      uses: snyk/actions/iac@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        file: deploy/k8s/kustomize/core/base/core.yml
+
+    - name: Upload result to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif        
+        
 
         
