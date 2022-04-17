@@ -43,6 +43,13 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
+    # Set the target Azure Kubernetes Service (AKS) cluster. 
+    - uses: azure/aks-set-context@v1
+      with:
+        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+        cluster-name: ${{ secrets.AKS_NAME }}
+        resource-group: ${{ env.RESOURCE_GROUP_NAME }}
+
     - name: Build Kustomize template
       run: |        
         kubectl apply -k deploy/k8s/kustomize/core/base --dry-run=client -oyaml > deploy/k8s/kustomize/core/base/core.yml
