@@ -35,7 +35,7 @@ jobs:
 
   # Deploy database, service bus etc.
   deploy-core-services:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     #needs: create-namespace-eshop
 
     steps:
