@@ -13,6 +13,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
+
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Attach ACR
         run: |
           var=${{ secrets.AKS_NAME }}
