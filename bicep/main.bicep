@@ -165,3 +165,4 @@ module sql 'modules/sql/sql.bicep' = if (azureResourceSwitch) {
 output arcName string = acr.outputs.acrName
 output aksRgName string = aksInfraResourceGroupName
 output aksName string = aks.outputs.clusterName
+output acrShortName string = acr.outputs.acrShortName

@@ -3,5 +3,7 @@ kind: Kustomization
 
 resources:  
   - sqlServer.yml
+  - seq.yml
+  - zipkin.yml
 
 namespace: eshopondapr  

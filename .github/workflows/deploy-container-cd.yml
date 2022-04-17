@@ -1,0 +1,4 @@
+name: DevSecOps CI
+
+on:
+  workflow_call:

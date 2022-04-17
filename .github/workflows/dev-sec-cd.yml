@@ -107,6 +107,13 @@ jobs:
           value: ${{ steps.armDeployment.outputs.aksName }}
           pa_token: ${{ secrets.PA_TOKEN }}    
 
+      - uses: gliech/create-github-secret-action@v1
+        name: Write ACR Short Name in secrets
+        with:
+          name: ACR_SHORTNAME
+          value: ${{ steps.armDeployment.outputs.acrShortName }}
+          pa_token: ${{ secrets.PA_TOKEN }}    
+
       - name: logout
         run: |
           az logout                              
