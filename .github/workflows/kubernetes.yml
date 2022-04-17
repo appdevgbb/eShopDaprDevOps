@@ -52,13 +52,12 @@ jobs:
   deploy-core-services:     
     # needs: create-namespace-eshop
     uses: ./.github/workflows/deploy-container-cd.yml    
-    with:
-      resource_group_name: rg-aks-devsecops
+    with:      
       kustomize-input-directory: deploy/k8s/kustomize/core/base
       kustomize-output-file: deploy/k8s/kustomize/core/base/core.yml
     secrets:      
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      AKS_NAME: ${{ secrets.REGISTRY_USERNAME }}
+      AKS_NAME: ${{ secrets.AKS_NAME }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
 
     # runs-on: self-hosted
