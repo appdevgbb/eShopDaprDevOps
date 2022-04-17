@@ -30,51 +30,51 @@ env:
   DOTNET_VERSION: 6.0.x
 
 jobs:
-  code-dep-scan:
-    runs-on: self-hosted
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+  # code-dep-scan:
+  #   runs-on: self-hosted
+  #   steps:
+  #   - name: Checkout repo
+  #     uses: actions/checkout@v2
 
-    - name: Install Snyk
-      uses: snyk/actions/setup@master
+  #   - name: Install Snyk
+  #     uses: snyk/actions/setup@master
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+  #   - name: Setup dotnet
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Build project
-      run: |
-        dotnet restore ${{ inputs.projectPath }}/${{ inputs.projectName }}
-        cd ${{ inputs.projectPath }}
-        dotnet build --no-restore
+  #   - name: Build project
+  #     run: |
+  #       dotnet restore ${{ inputs.projectPath }}/${{ inputs.projectName }}
+  #       cd ${{ inputs.projectPath }}
+  #       dotnet build --no-restore
 
-    - name: Find security issues using static code analysis
-      run: |
-       snyk auth ${{ secrets.SNYK_TOKEN }}
-       snyk code test --sarif-file-output=snykcode.sarif --severity-threshold=low ${{ inputs.projectPath }}
+  #   - name: Find security issues using static code analysis
+  #     run: |
+  #      snyk auth ${{ secrets.SNYK_TOKEN }}
+  #      snyk code test --sarif-file-output=snykcode.sarif --severity-threshold=low ${{ inputs.projectPath }}
 
-    - name: Test a project for open source vulnerabilities and license issues.
-      if: always() # To be sure the sarif file is always uploaded
-      run: |
-       snyk auth ${{ secrets.SNYK_TOKEN }}
-       snyk test --sarif-file-output=snyktest.sarif --severity-threshold=low ${{ inputs.projectPath }}
+  #   - name: Test a project for open source vulnerabilities and license issues.
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     run: |
+  #      snyk auth ${{ secrets.SNYK_TOKEN }}
+  #      snyk test --sarif-file-output=snyktest.sarif --severity-threshold=low ${{ inputs.projectPath }}
 
-    - name: Upload result to GitHub Code Scanning Alerts for static code analysis
-      if: always() # To be sure the sarif file is always uploaded
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snykcode.sarif
+  #   - name: Upload result to GitHub Code Scanning Alerts for static code analysis
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     uses: github/codeql-action/upload-sarif@v1
+  #     with:
+  #       sarif_file: snykcode.sarif
 
-    - name: Upload result to GitHub Code Scanning Alerts for open source vulnerabilities
-      if: always() # To be sure the sarif file is always uploaded
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyktest.sarif
+  #   - name: Upload result to GitHub Code Scanning Alerts for open source vulnerabilities
+  #     if: always() # To be sure the sarif file is always uploaded
+  #     uses: github/codeql-action/upload-sarif@v1
+  #     with:
+  #       sarif_file: snyktest.sarif
 
   container-scan:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     
     - name: Checkout repo
@@ -82,7 +82,7 @@ jobs:
 
     - name: Build container image
       run: |
-        sudo docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
+        docker build -f ${{ inputs.projectPath }}/Dockerfile -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }} . 
 
    # Note: Once MS Defender for DevOps goes GA with Linux this task is redundant
     - name: Run Trivy and Dockle container scan
@@ -93,11 +93,11 @@ jobs:
         image-name: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}
         run-quality-checks: true
 
-    - uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
+    # # - uses: azure/docker-login@v1
+    # #   with:
+    # #     login-server: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+    # #     username: ${{ secrets.REGISTRY_USERNAME }}
+    # #     password: ${{ secrets.REGISTRY_PASSWORD }}
 
   # cred-scan:
   #   runs-on: windows-latest
