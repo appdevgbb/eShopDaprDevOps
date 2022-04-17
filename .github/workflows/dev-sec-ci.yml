@@ -74,7 +74,7 @@ jobs:
   #       sarif_file: snyktest.sarif
 
   container-scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     
     - name: Checkout repo
