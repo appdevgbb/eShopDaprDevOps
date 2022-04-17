@@ -18,7 +18,7 @@ jobs:
           var=${{ secrets.AKS_NAME }}
           replace=""
           acrname=${var//.azurecr.io/$replace}
-          az aks update -n ${{ secrets.AKS_NAME }} --attach-acr $acrname
+          az aks update -n ${{ secrets.AKS_NAME }} -g ${{ env.RESOURCE_GROUP_NAME }} --attach-acr $acrname
 
   create-namespace-eshop:
     runs-on: self-hosted
