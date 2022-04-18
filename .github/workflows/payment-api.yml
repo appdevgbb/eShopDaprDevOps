@@ -48,8 +48,8 @@ jobs:
           imageTag: ${{ github.sha }}
       
       - name: Kustomize
-        run: |
-          kubectl apply -k deploy/k8s/kustomize/services/payment --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/output/payment-api.yml
+        run: |           
+          kubectl apply -k deploy/k8s/kustomize/services/payment --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/payment-api.output.yml
 
       - uses: actions/upload-artifact@v3
         with:
