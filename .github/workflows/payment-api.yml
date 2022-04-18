@@ -8,50 +8,55 @@ env:
   IMAGE: payment.api
 
 jobs:
-  # Call-dev-sec-ci:
-  #   uses: ./.github/workflows/dev-sec-ci.yml
-  #   with:
-  #     imageName: payment-api
-  #     projectPath: src/Services/Payment/Payment.API
-  #     projectName: Payment.API.csproj
-  #   secrets:
-  #     AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
-  #     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-  #     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-  #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #     AZ_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}  
-  #     AZ_SUBSCRIPTION_TOKEN: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+  Call-dev-sec-ci:
+    uses: ./.github/workflows/dev-sec-ci.yml
+    with:
+      imageName: payment-api
+      projectPath: src/Services/Payment/Payment.API
+      projectName: Payment.API.csproj
+    secrets:
+      AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      AZ_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}  
+      AZ_SUBSCRIPTION_TOKEN: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
 
   deploy-to-kubernetes:     
-    #needs: Call-dev-sec-ci
-    runs-on: self-hosted
+    needs: Call-dev-sec-ci
+    uses: ./.github/workflows/deploy-container-cd.yml    
+    with:      
+      kustomize-input-directory: deploy/k8s/kustomize/services/payment
+      kustomize-output-file: deploy/k8s/kustomize/services/payment/payment-api.output.yml
+      imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
+    secrets:      
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AKS_NAME: ${{ secrets.AKS_NAME }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+    # runs-on: self-hosted
 
-      # Set the target Azure Kubernetes Service (AKS) cluster. 
-      - uses: azure/aks-set-context@v1
-        with:
-          creds: '${{ secrets.AZURE_CREDENTIALS }}'
-          cluster-name: ${{ secrets.AKS_NAME }}
-          resource-group: rg-aks-devsecops     
+    # steps:
+    #   - name: Checkout repo
+    #     uses: actions/checkout@v2
+
+    #   # Set the target Azure Kubernetes Service (AKS) cluster. 
+    #   - uses: azure/aks-set-context@v1
+    #     with:
+    #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
+    #       cluster-name: ${{ secrets.AKS_NAME }}
+    #       resource-group: rg-aks-devsecops     
             
-      - name: Replace tokens
-        uses: cschleiden/replace-tokens@v1.0
-        with:        
-          tokenPrefix: __        
-          tokenSuffix: __        
-          files: '["deploy/k8s/kustomize/services/payment/kustomization.yml"]'
-        env:          
-          imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
-          imageTag: ${{ github.sha }}
+    #   - name: Replace tokens
+    #     uses: cschleiden/replace-tokens@v1.0
+    #     with:        
+    #       tokenPrefix: __        
+    #       tokenSuffix: __        
+    #       files: '["deploy/k8s/kustomize/services/payment/kustomization.yml"]'
+    #     env:          
+    #       imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
+    #       imageTag: ${{ github.sha }}
       
-      - name: Kustomize
-        run: |           
-          kubectl apply -k deploy/k8s/kustomize/services/payment --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/payment-api.output.yml
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: artifact
-          path: deploy/k8s/kustomize/services/payment/payment-api.output.yml                                  
+    #   - name: Kustomize
+    #     run: |           
+    #       kubectl apply -k deploy/k8s/kustomize/services/payment --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/payment-api.output.yml                              

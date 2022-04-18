@@ -8,7 +8,10 @@ on:
         type: string
       kustomize-output-file:
         required: true
-        type: string      
+        type: string     
+      imageName:
+        required: false
+        type: string   
     secrets:
       AZURE_CREDENTIALS:
         required: true
@@ -22,7 +25,7 @@ env:
 
 jobs:
   scan-kubernetes-manifest-file:
-
+  
     runs-on: self-hosted
     steps:
 
@@ -35,6 +38,16 @@ jobs:
         creds: '${{ secrets.AZURE_CREDENTIALS }}'
         cluster-name: ${{ secrets.AKS_NAME }}
         resource-group: ${{ env.RESOURCE_GROUP_NAME }}
+
+    - name: Replace tokens
+      uses: cschleiden/replace-tokens@v1.0
+      with:        
+        tokenPrefix: __        
+        tokenSuffix: __        
+        files: ${{ inputs.kustomize-input-directory }
+      env:          
+        imageName: ${{ inputs.imageName }}
+        imageTag: ${{ github.sha }}
 
     - name: Build Kustomize template
       run: |        
@@ -56,4 +69,5 @@ jobs:
     
     - name: Deploy Core Service in Kubernetes
       run: |
-        kubectl apply -f ${{ inputs.kustomize-output-file }}      
+        kubectl apply -f ${{ inputs.kustomize-output-file }}
+
