@@ -78,7 +78,7 @@ jobs:
         name: input
         path: ${{ inputs.kustomize-input-directory  }}
 
-#    - name: Deploy Core Service in Kubernetes
-#      run: |
-#        kubectl apply -f ${{ inputs.kustomize-output-file }}
+    - name: Deploy Core Service in Kubernetes
+      run: |
+        kubectl apply -f ${{ inputs.kustomize-output-file }}
 
