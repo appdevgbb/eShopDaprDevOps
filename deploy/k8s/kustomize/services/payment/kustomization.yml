@@ -8,6 +8,6 @@ resources:
   - payment-api.yml
 
 images:
-- name: payment-api
+- name: eshopdapr/payment.api
 - newName: __imageName__
   newTag: __imageTag__
