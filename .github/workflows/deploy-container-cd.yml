@@ -65,8 +65,18 @@ jobs:
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: snykks8.sarif
-      
-    - name: Deploy Core Service in Kubernetes
-      run: |
-        kubectl apply -f ${{ inputs.kustomize-output-file }}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: output
+        path: ${{ inputs.kustomize-output-file }}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: input
+        path: ${{ inputs.kustomize-input-directory  }}
+
+#    - name: Deploy Core Service in Kubernetes
+#      run: |
+#        kubectl apply -f ${{ inputs.kustomize-output-file }}
 
