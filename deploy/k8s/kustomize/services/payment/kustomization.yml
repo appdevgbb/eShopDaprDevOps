@@ -1,12 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+bases:
+- ../base
+
 resources:  
   - payment-api.yml
 
 images:
 - name: eshopdapr/payment.api
-- newName: __imageName__
+  newName: __imageName__
   newTag: __imageTag__
-
-namespace: eshopondapr
