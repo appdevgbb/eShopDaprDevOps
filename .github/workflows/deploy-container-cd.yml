@@ -44,7 +44,7 @@ jobs:
       with:        
         tokenPrefix: __        
         tokenSuffix: __        
-        files: ${{ inputs.kustomize-input-directory }
+        files: ${{ inputs.kustomize-input-directory }}
       env:          
         imageName: ${{ inputs.imageName }}
         imageTag: ${{ github.sha }}

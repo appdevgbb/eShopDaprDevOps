@@ -60,7 +60,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
 
   deploy-dapr-components:     
-    needs: create-namespace-eshop
+    needs: [create-namespace-eshop,configure-acr]
     uses: ./.github/workflows/deploy-container-cd.yml    
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/dapr/base
