@@ -49,7 +49,7 @@ jobs:
 
   # # Deploy database, service bus etc.
   deploy-core-services:     
-    needs: create-namespace-eshop
+    needs: [create-namespace-eshop,configure-acr]
     uses: ./.github/workflows/deploy-container-cd.yml    
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/core/base
