@@ -19,6 +19,8 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
+      AZURE_CONTAINER_REGISTRY:
+        required: false
 
 env:
   RESOURCE_GROUP_NAME: rg-aks-devsecops

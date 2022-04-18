@@ -32,4 +32,5 @@ jobs:
     secrets:      
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AKS_NAME: ${{ secrets.AKS_NAME }}
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}                         
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}                       
