@@ -46,8 +46,12 @@ jobs:
         env:          
           imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
           imageTag: ${{ github.sha }}
+      
+      - name: Kustomize
+        run: |
+          kubectl apply -k deploy/k8s/kustomize/services/payment/kustomization.ym --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/payment-api.yml
 
       - uses: actions/upload-artifact@v3
         with:
           name: artifact
-          path: deploy/k8s/kustomize/services/payment/kustomization.yml                                   
+          path: deploy/k8s/kustomize/services/payment/payment-api.yml                                  
