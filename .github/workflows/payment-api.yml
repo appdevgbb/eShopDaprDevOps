@@ -42,7 +42,7 @@ jobs:
         with:        
           tokenPrefix: __        
           tokenSuffix: __        
-          files: '["deploy/k8s/kustomize/services/payment/kustomize.yml"]'
+          files: '["deploy/k8s/kustomize/services/payment/kustomization.yml"]'
         env:          
           imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
           imageTag: ${{ github.sha }}
@@ -50,4 +50,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: artifact
-          path: deploy/k8s/kustomize/services/payment/kustomize.yml                                   
+          path: deploy/k8s/kustomize/services/payment/kustomization.yml                                   
