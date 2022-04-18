@@ -5,5 +5,8 @@ resources:
   - sqlServer.yml
   - seq.yml
   - zipkin.yml
+  - maildev.yml
+  - redis.yml
+  - secrets.yml
 
 namespace: eshopondapr  

@@ -9,48 +9,47 @@ env:
 
 jobs:
   
-  configure-acr:
-    runs-on: self-hosted
+  # configure-acr:
+  #   runs-on: self-hosted
 
-    steps:
+  #   steps:
 
-      - name: Azure Login
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: Azure Login
+  #       uses: Azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Attach ACR
-        run: |
-          az aks update -n ${{ secrets.AKS_NAME }} -g ${{ env.RESOURCE_GROUP_NAME }} --attach-acr ${{ secrets.ACR_SHORTNAME }}
+  #     - name: Attach ACR
+  #       run: |
+  #         az aks update -n ${{ secrets.AKS_NAME }} -g ${{ env.RESOURCE_GROUP_NAME }} --attach-acr ${{ secrets.ACR_SHORTNAME }}
 
-  create-namespace-eshop:
-    runs-on: self-hosted
-    needs: configure-acr
+  # create-namespace-eshop:
+  #   runs-on: self-hosted
 
-    steps:      
-      - uses: azure/aks-set-context@v1
-        with:
-          creds: '${{ secrets.AZURE_CREDENTIALS }}'
-          cluster-name: ${{ secrets.AKS_NAME }}
-          resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
+  #   steps:      
+  #     - uses: azure/aks-set-context@v1
+  #       with:
+  #         creds: '${{ secrets.AZURE_CREDENTIALS }}'
+  #         cluster-name: ${{ secrets.AKS_NAME }}
+  #         resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
 
-      # Create namespace if doesn't exist
-      - name: Create K8s Namespace
-        run: |
-          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -
+  #     # Create namespace if doesn't exist
+  #     - name: Create K8s Namespace
+  #       run: |
+  #         kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -
 
-      - name: Install Dapr
-        run: |
-          # Validate if Dapr is already installed
-          daprInstalled=$(kubectl get ns | grep dapr-system)
-          if [ -z "$daprInstalled" ]
-          then
-            dapr init -k --enable-ha=true --wait --timeout 600
-          fi
+  #     - name: Install Dapr
+  #       run: |
+  #         # Validate if Dapr is already installed
+  #         daprInstalled=$(kubectl get ns | grep dapr-system)
+  #         if [ -z "$daprInstalled" ]
+  #         then
+  #           dapr init -k --enable-ha=true --wait --timeout 600
+  #         fi
 
-  # Deploy database, service bus etc.
+  # # Deploy database, service bus etc.
   deploy-core-services:     
-    needs: create-namespace-eshop
+    #needs: create-namespace-eshop
     uses: ./.github/workflows/deploy-container-cd.yml    
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/core/base
@@ -61,7 +60,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
 
   deploy-dapr-components:     
-    needs: create-namespace-eshop
+    #needs: create-namespace-eshop
     uses: ./.github/workflows/deploy-container-cd.yml    
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/dapr/base
