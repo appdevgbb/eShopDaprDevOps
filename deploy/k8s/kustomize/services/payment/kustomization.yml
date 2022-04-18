@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../base
+
+resources:  
+  - payment-api.yml
+
+images:
+- name: payment-api
+- newName: __imageName__
+  newTag: __imageTag__

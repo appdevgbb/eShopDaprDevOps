@@ -11,12 +11,11 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseCustomSwagger();
 }
+app.UseCustomSwagger();
 
 app.UseCloudEvents();
 

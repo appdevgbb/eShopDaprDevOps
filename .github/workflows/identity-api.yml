@@ -17,5 +17,3 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       AZ_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}  
       AZ_SUBSCRIPTION_TOKEN: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
-
-  Deploy-dev-sec-cd:      
