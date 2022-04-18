@@ -28,7 +28,7 @@ jobs:
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/services/payment
       kustomize-output-file: deploy/k8s/kustomize/services/payment/payment-api.output.yml
-      imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
+      imageName: payment-api
     secrets:      
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AKS_NAME: ${{ secrets.AKS_NAME }}

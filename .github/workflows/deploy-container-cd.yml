@@ -46,7 +46,7 @@ jobs:
         tokenSuffix: __        
         files: ${{ inputs.kustomize-input-directory }}
       env:          
-        imageName: ${{ inputs.imageName }}
+        imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}
         imageTag: ${{ github.sha }}
 
     - name: Build Kustomize template
