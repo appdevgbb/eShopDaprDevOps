@@ -54,4 +54,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: artifact
-          path: deploy/k8s/kustomize/services/payment/payment-api.yml                                  
+          path: deploy/k8s/kustomize/services/payment/payment-api.output.yml                                  
