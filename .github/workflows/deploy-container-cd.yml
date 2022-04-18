@@ -8,7 +8,7 @@ on:
         type: string
       kustomize-output-file:
         required: true
-        type: string     
+        type: string           
       imageName:
         required: false
         type: string   
@@ -44,7 +44,7 @@ jobs:
       with:        
         tokenPrefix: __        
         tokenSuffix: __        
-        files: ${{ inputs.kustomize-input-directory }}
+        files: ${{ inputs.kustomize-input-directory }}/kustomization.yml
       env:          
         imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}
         imageTag: ${{ github.sha }}
@@ -54,18 +54,33 @@ jobs:
         kubectl apply -k ${{ inputs.kustomize-input-directory }} --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
 
     # Continue on error, this is for demo purpose
-    - name: Check configuration files for security issues with Snyk
+    - name: Check manifest kubernetes files
       continue-on-error: true
-      uses: snyk/actions/iac@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      uses: aquasecurity/trivy-action@master
       with:
-        file: ${{ inputs.kustomize-output-file }}
+        scan-type: 'config'
+        scan-ref: ${{ inputs.kustomize-output-file }}
+        hide-progress: false
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
 
-    - name: Upload result to GitHub Code Scanning
+    - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: snyk.sarif      
+        sarif_file: 'trivy-results.sarif'
+
+      # uses: snyk/actions/iac@master
+      # env:
+      #   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # with:
+      #   file: ${{ inputs.kustomize-output-file }}
+
+    # - name: Upload result to GitHub Code Scanning
+    #   uses: github/codeql-action/upload-sarif@v1
+    #   with:
+    #     sarif_file: snyk.sarif      
     
     - name: Deploy Core Service in Kubernetes
       run: |

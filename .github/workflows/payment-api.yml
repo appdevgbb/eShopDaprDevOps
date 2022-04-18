@@ -32,31 +32,4 @@ jobs:
     secrets:      
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AKS_NAME: ${{ secrets.AKS_NAME }}
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
-
-    # runs-on: self-hosted
-
-    # steps:
-    #   - name: Checkout repo
-    #     uses: actions/checkout@v2
-
-    #   # Set the target Azure Kubernetes Service (AKS) cluster. 
-    #   - uses: azure/aks-set-context@v1
-    #     with:
-    #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
-    #       cluster-name: ${{ secrets.AKS_NAME }}
-    #       resource-group: rg-aks-devsecops     
-            
-    #   - name: Replace tokens
-    #     uses: cschleiden/replace-tokens@v1.0
-    #     with:        
-    #       tokenPrefix: __        
-    #       tokenSuffix: __        
-    #       files: '["deploy/k8s/kustomize/services/payment/kustomization.yml"]'
-    #     env:          
-    #       imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/payment-api
-    #       imageTag: ${{ github.sha }}
-      
-    #   - name: Kustomize
-    #     run: |           
-    #       kubectl apply -k deploy/k8s/kustomize/services/payment --dry-run=client -oyaml > deploy/k8s/kustomize/services/payment/payment-api.output.yml                              
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}                         
