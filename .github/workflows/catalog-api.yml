@@ -2,23 +2,6 @@ name: catalog-api
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-    - main
-
-    paths:
-    - src/BuildingBlocks/**
-    - src/Services/Catalog/**
-    - .github/workflows/catalog-api.yml
-  
-  pull_request:
-    branches:
-    - main
-    
-    paths:
-    - src/BuildingBlocks/**
-    - src/Services/Catalog/**
-    - .github/workflows/catalog-api.yml
 
 jobs:
   Call-dev-sec-ci:
