@@ -51,9 +51,23 @@ jobs:
         imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}
         imageTag: ${{ github.sha }}
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: modifiedInput
+        path: ${{ inputs.kustomize-input-directory  }}
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: modifiedInput
+        path: ${{ inputs.kustomize-input-directory }}/kustomize/artifact
+
+    # - name: Build Kustomize template
+    #   run: |        
+    #     kubectl apply -k ${{ inputs.kustomize-input-directory }} --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
+
     - name: Build Kustomize template
       run: |        
-        kubectl apply -k ${{ inputs.kustomize-input-directory }} --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
+        kubectl apply -k ${{ inputs.kustomize-input-directory }}/kustomize/artifact --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
 
     # Continue on error, this is for demo purpose
     - name: Scan Kubernetes manifest file
@@ -73,10 +87,10 @@ jobs:
         name: output
         path: ${{ inputs.kustomize-output-file }}
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: input
-        path: ${{ inputs.kustomize-input-directory  }}
+    # - uses: actions/upload-artifact@v3
+    #   with:
+    #     name: input
+    #     path: ${{ inputs.kustomize-input-directory  }}
 
     - name: Deploy Core Service in Kubernetes
       run: |
