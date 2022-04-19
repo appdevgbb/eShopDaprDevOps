@@ -12,6 +12,10 @@ This repository uses GitHub Actions but you could use any CI/CD tooling to run y
 
 The sample show an implementation of DevSecOps for container end to end in a CI/CD pipeline.
 
+This is what will be created in your Azure subscription.
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/azresources.png">
+
 # How to install the demo
 
 ## Fork the repository
