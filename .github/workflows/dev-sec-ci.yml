@@ -103,33 +103,33 @@ jobs:
       run: |
         docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}:${{ github.sha }}        
 
-  # cred-scan:
-  #   runs-on: windows-latest
-  #   steps:
-  #   - name: Checkout repo
-  #     uses: actions/checkout@v2
+  cred-scan:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
 
-  #   - name: Setup dotnet
-  #     uses: actions/setup-dotnet@v1
-  #     with:
-  #       dotnet-version: |
-  #         5.0.x
-  #         6.0.x
-  #         3.1.x
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          5.0.x
+          6.0.x
+          3.1.x
 
-  #   - name: Run Microsoft Security DevOps Analysis
-  #     uses: microsoft/security-devops-action@preview
-  #     id: msdo
-  #     with:
-  #       policy: microsoft
+    - name: Run Microsoft Security DevOps Analysis
+      uses: microsoft/security-devops-action@preview
+      id: msdo
+      with:
+        policy: microsoft
 
-  #   - name: Upload result to GitHub Code Scanning Alerts
-  #     uses: github/codeql-action/upload-sarif@v1
-  #     with:
-  #       sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+    - name: Upload result to GitHub Code Scanning Alerts
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-  #   - name: Upload alerts file as workflow artifact
-  #     uses: actions/upload-artifact@v3
-  #     with:  
-  #       name: alerts
-  #       path: ${{ steps.msdo.outputs.sarifFile }}
+    - name: Upload alerts file as workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo.outputs.sarifFile }}
