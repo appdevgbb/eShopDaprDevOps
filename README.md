@@ -26,6 +26,8 @@ To do so follow the instruction [here](https://github.com/marketplace/actions/az
 
 Copy/Paste the output result, you will need to create it for a GitHub Secret.  **The scope** of the service principal for this demo should be at subscription level.
 
+The contributor role won't be enough to create the cluster.  See the section Create Azure Resources for more details.  Here you can give Contributor to the service principal and create a custom role for the AAD permission.  If you want lower than Contributor you will need to assign the proper rights to the Service Principal.
+
 ## Create an account for Snyk
 
 One of the tool used in this demo is Snyk, Snyk is used to scan the code of the application, the dependency chain, the bicep files and finally the Kubernetes manifest file.
@@ -59,7 +61,29 @@ Now before executing the GitHub Action you will need to create some GitHub Secre
 
 | Secret Name | Description | Value 
 | ----------- | ------------|
-| AAD_ADMIN_GROUP_ID | When Azure AD Admin Group for Kubernetes | The object ID of the Azure AD Group
+| AAD_ADMIN_GROUP_ID | The object ID of the Azure AD Admin Group created before
+| ADMIN_USERNAME | Username to login to the Github Self Runner VM
+| ADMIN_PASSWORD | Password to login to the GitHub Self Runner VM
+| AZURE_CREDENTIALS | The service principal created before
+| PA_TOKEN | The personnal GitHub Token created before
+| SNYK_TOKEN | The SNYK token from your Snyk Account
+| SUBSCRIPTION_ID | The subscription ID where the Azure Resources will be created
+
+## Create Azure Resources
+
+Now is time to create all the resources in Azure, go to the Actions tab in GitHub and run the **Create Azure Resources** action.
+
+If the GitHub Action fail with the following error:
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/error.png">
+
+This mean your service principal doesn't have enough write. You can give it the **Owner** role or create a custom role with **Microsoft.Authorization/roleAssignments/write**.
+
+**It's recommended** to create custom role to have the less privilege possible.
+
+The custom role will look something like this.
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/customrole.png">
 
 
 # Toolchain
