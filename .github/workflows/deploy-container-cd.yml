@@ -34,6 +34,9 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
+    - name: Install Snyk
+      uses: snyk/actions/setup@master
+
     # Set the target Azure Kubernetes Service (AKS) cluster. 
     - uses: azure/aks-set-context@v1
       with:
