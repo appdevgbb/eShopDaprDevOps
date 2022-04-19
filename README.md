@@ -144,7 +144,7 @@ kubectl get svc -n eshopondapr
 
 The payment-api use a Load Balancer Kubernetes Service.  Take not of the external IP address and copy/paste it in an Internet Browser.
 
-<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/loadbalapayment.png">
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/payment.png">
 
 # Toolchain
 
