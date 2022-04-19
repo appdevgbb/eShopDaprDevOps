@@ -34,9 +34,35 @@ Go to Snyk [website](https://snyk.io/) and create a free account.
 
 Select the eShopDaprDevOps repository only (you can choose more if you want).
 
-<img title="a title" alt="Alt text" src="/images/boo.svg">
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/snykrepo.png">
 
-## Toolchain
+Click the Import and scan button.
+
+Now you will need to get your Snyk Token, it's needed for a GitHub secrets.
+
+To find it follow those [instructions](https://github.com/marketplace/actions/snyk#getting-your-snyk-token).
+
+## Create a GitHub Personal Token
+
+In the GitHub Action one of the step will write secrets, depending if your repository is public or private the right will be different.
+
+Follow the instruction [here](https://github.com/gliech/create-github-secret-action#pa_token) to create your GitHub Personal  access token with the right permission.  Write it down, you will need it when creating the GitHub Secrets.
+
+## Create an Azure Active Directory Group for Kubernetes
+
+The kubernetes cluster is created with Azure Active Directory integration.  This mean you will need to create a group in Active Directory, follow this [instruction](https://docs.microsoft.com/en-us/azure/aks/managed-aad#before-you-begin) to create the Azure AD Group.  Be sure to add yourself to the group and take note of the 
+**object ID** returned after creating the AAD Group.
+
+## Create the GitHub Secrets
+
+Now before executing the GitHub Action you will need to create some GitHub Secrets.
+
+| Secret Name | Description | Value 
+| ----------- | ------------|
+| AAD_ADMIN_GROUP_ID | When Azure AD Admin Group for Kubernetes | The object ID of the Azure AD Group
+
+
+# Toolchain
 
 We used a variety of tools from various organizations in this project including Snyk, Aqua Security, Microsoft Defender and more.
 

@@ -30,12 +30,6 @@ param aadAdminGroupId string
 @description('The setting for the AzureCNI networking')
 param aksAzureCniSettings object
 
-@secure()
-param adminSqlUsername string
-
-@secure()
-param adminSqlPassword string
-
 @description('Switch if you are not running the data storage locally in the AKS cluster')
 param azureResourceSwitch bool = false
 
@@ -153,14 +147,14 @@ module servicebus 'modules/servicebus/servicebus.bicep' = if (azureResourceSwitc
   }
 }
 
-module sql 'modules/sql/sql.bicep' = if (azureResourceSwitch) {
-  name: 'sql'
-  params: {
-    administratorLogin: adminSqlUsername
-    administratorLoginPassword: adminSqlPassword
-    location: location
-  }
-}
+// module sql 'modules/sql/sql.bicep' = if (azureResourceSwitch) {
+//   name: 'sql'
+//   params: {
+//     administratorLogin: adminSqlUsername
+//     administratorLoginPassword: adminSqlPassword
+//     location: location
+//   }
+// }
 
 output arcName string = acr.outputs.acrName
 output aksRgName string = aksInfraResourceGroupName
