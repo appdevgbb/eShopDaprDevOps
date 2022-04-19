@@ -32,22 +32,17 @@ jobs:
           creds: '${{ secrets.AZURE_CREDENTIALS }}'
           cluster-name: ${{ secrets.AKS_NAME }}
           resource-group: ${{ env.RESOURCE_GROUP_NAME }}  
-
-      # Create namespace if doesn't exist
+      
       - name: Create K8s Namespace
         run: |
           kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o json | kubectl apply -f -
 
       - name: Install Dapr
-        run: |
-          # Validate if Dapr is already installed
-          daprInstalled=$(kubectl get ns | grep dapr-system)
-          if [ -z "$daprInstalled" ]
-          then
-            dapr init -k --enable-ha=true --wait --timeout 600
-          fi
+        run: |          
+          dapr init -k --enable-ha=true --wait --timeout 600
+        continue-on-error: true
 
-  # # Deploy database, service bus etc.
+  # Deploy database, service bus etc.
   deploy-core-services:     
     needs: [create-namespace-eshop,configure-acr]
     uses: ./.github/workflows/deploy-container-cd.yml    

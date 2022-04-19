@@ -59,8 +59,8 @@ The kubernetes cluster is created with Azure Active Directory integration.  This
 
 Now before executing the GitHub Action you will need to create some GitHub Secrets.
 
-| Secret Name | Description | Value 
-| ----------- | ------------|
+| Secret Name | Description 
+| ----------- | ------------
 | AAD_ADMIN_GROUP_ID | The object ID of the Azure AD Admin Group created before
 | ADMIN_USERNAME | Username to login to the Github Self Runner VM
 | ADMIN_PASSWORD | Password to login to the GitHub Self Runner VM
@@ -85,6 +85,66 @@ The custom role will look something like this.
 
 <img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/customrole.png">
 
+## Create more GitHub Secrets.
+
+Now you need to add two more GitHub secrets.
+
+Go to the resource group **rg-aks-devsecops** in the Azure Portal.  You will see your Container registry, click on it and go to **Access keys** in the left blade menu.
+
+From there copy the **username** and **password**
+
+You will create those two GitHub Secrets.
+
+| Secret Name | Description 
+| ----------- | ------------
+| REGISTRY_USERNAME | The username of the Azure Container Registry
+| REGISTRY_PASSWORD | The password of the Azure Container Registry
+
+## Configure the GitHub Self-Runner
+
+Because the Kubernetes API and the Azure Container Registry are using private endpoint we need to use two GitHub Self-Runner to deploy and create our docker image.
+
+Now is time to configure the two GitHub Self-Runner.  In the resource group you will see two Linux Virtual Machine
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/runner.png">
+
+Login to the first virtual machine (runner-0).
+
+Run the following commands
+
+```
+sudo usermod -aG docker $USER
+newgrp docker
+sudo chown root:docker /var/run/docker.sock
+```
+
+Now [install](https://docs.github.com/en/actions/hosting-your-own-runners/adding-self-hosted-runners) the GitHub Self-Runner agent
+
+Repeat the same process for the Virtual Machine called runner-1
+
+## Install the core services and dapr in AKS
+
+Now is time to install all the storage services and Dapr components in AKS.  To do so go to the **Actions tab** in the GitHub repository and run the **Configure Kubernetes** action.
+
+## Deploy payment api
+
+Right now, only payment api is possible to be deployed in Kubernetes.  All the other Github Action will only created the docker image and push it into an Azure Container Registry.
+
+Go to the **Actions** tab, run the payment-api.
+
+Once is done login again to one of the runner and connect to your AKS cluster.
+
+Once is done run this command
+
+```
+kubectl get svc -n eshopondapr
+```
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/loadbalancer.png">
+
+The payment-api use a Load Balancer Kubernetes Service.  Take not of the external IP address and copy/paste it in an Internet Browser.
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/payment.png">
 
 # Toolchain
 

@@ -24,7 +24,7 @@ jobs:
 
   deploy-to-kubernetes:     
     needs: Call-dev-sec-ci
-    uses: ./.github/workflows/deploy-container-cd.yml    
+    uses: ./.github/workflows/dev-sec-cd.yml   
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/services/payment
       kustomize-output-file: deploy/k8s/kustomize/services/payment/payment-api.output.yml

@@ -1,119 +1,87 @@
-name: Create Azure Resources
+name: Deploy Container
 
 on:
-  workflow_dispatch:
-        
+  workflow_call:
+    inputs:   
+      kustomize-input-directory:
+        required: true
+        type: string
+      kustomize-output-file:
+        required: true
+        type: string           
+      imageName:
+        required: false
+        type: string   
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+      AKS_NAME:
+        required: true
+      SNYK_TOKEN:
+        required: true
+      AZURE_CONTAINER_REGISTRY:
+        required: false
+
+env:
+  RESOURCE_GROUP_NAME: rg-aks-devsecops
+
 jobs:
-  create-azure-resources:
-    
-    env:
-      LOCATION: 'eastus'
-      RESOURCE_GROUP_NAME: 'rg-aks-devsecops'
-
-    runs-on: ubuntu-latest
-
+  scan-kubernetes-manifest-file:
+  
+    runs-on: self-hosted
     steps:
 
-      - uses: actions/checkout@v2
+    - name: Checkout repo
+      uses: actions/checkout@v2
 
-      - name: Azure Login
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}    
+    - name: Install Snyk
+      uses: snyk/actions/setup@master
 
-      - name: Create Resource Group
-        run: |
-          az group create -n ${{ env.RESOURCE_GROUP_NAME }} -l ${{ env.LOCATION }} 
+    # Set the target Azure Kubernetes Service (AKS) cluster. 
+    - uses: azure/aks-set-context@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        cluster-name: ${{ secrets.AKS_NAME }}
+        resource-group: ${{ env.RESOURCE_GROUP_NAME }}
 
-      # If any error is present the GH action will stop there
-      # this avoid to try to deploy the template for nothing
-      - name: Convert to ARM template
-        run: |
-          bicep build ./bicep/main.bicep  
+    - name: Replace tokens
+      uses: cschleiden/replace-tokens@v1.0
+      with:        
+        tokenPrefix: __        
+        tokenSuffix: __        
+        files: ${{ inputs.kustomize-input-directory }}/kustomization.yml
+      env:          
+        imageName: ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ inputs.imageName }}
+        imageTag: ${{ github.sha }}
 
-      - name: Run Snyk to check bicep tmpl security
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the issues to GitHub Code Scanning
-        continue-on-error: true
-        uses: snyk/actions/iac@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          file: ./bicep/main.json
+    - name: Build Kustomize template
+      run: |        
+        kubectl apply -k ${{ inputs.kustomize-input-directory }} --dry-run=client -oyaml > ${{ inputs.kustomize-output-file }}  
 
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: snyk.sarif  
+    # Continue on error, this is for demo purpose
+    - name: Scan Kubernetes manifest file
+      if: always() # To be sure the sarif file is always uploaded
+      run: |
+        snyk auth ${{ secrets.SNYK_TOKEN }}
+        snyk iac test --sarif-file-output=snykks8.sarif --severity-threshold=low ${{ inputs.kustomize-output-file }}   
+    
+    - name: Upload result to GitHub Code Scanning Alerts for static code analysis
+      if: always() # To be sure the sarif file is always uploaded
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snykks8.sarif
 
-      # TODO: Add in Run Microsoft Security DevOps Analysis action for Terrascan and ARM Template Analyzer  
+    # - uses: actions/upload-artifact@v3
+    #   with:
+    #     name: output
+    #     path: ${{ inputs.kustomize-output-file }}
 
-      # Replace parameter in parameter file
-      - name: Replace token parameters file
-        uses: cschleiden/replace-tokens@v1.0
-        with:        
-          tokenPrefix: __        
-          tokenSuffix: __        
-          files: '["bicep/main.parameters.json"]'
-        env:
-          location: ${{ env.LOCATION  }}
-          adminUsername: ${{ secrets.ADMIN_USERNAME }}
-          adminPassword: ${{ secrets.ADMIN_PASSWORD }}              
-          aadAdminGroupId: ${{ secrets.AAD_ADMIN_GROUP_ID }}
-          adminSqlUsername: ${{ secrets.ADMIN_SQL_USERNAME }}
-          adminSqlPassword: ${{ secrets.ADMIN_SQL_PASSWORD }} 
+    # - uses: actions/upload-artifact@v3
+    #   with:
+    #     name: input
+    #     path: ${{ inputs.kustomize-input-directory  }}
 
-      # See the change to be deployed, a good practice
-      # will be to leverage environment and approvers
-      - name: what-if
-        run: |
-          az deployment group what-if --resource-group ${{ env.RESOURCE_GROUP_NAME }} --template-file ./bicep/main.json --parameters ./bicep/main.parameters.json
+    - name: Deploy Core Service in Kubernetes
+      run: |
+        kubectl apply -f ${{ inputs.kustomize-output-file }}
 
-      - name: Deploy Azure Resources
-        id: armDeployment
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
-          template: ./bicep/main.json
-          parameters: ./bicep/main.parameters.json
-      
-      - name: Add jumpbox A record
-        run: |
-          $vms = az vm list -g ${{ env.RESOURCE_GROUP_NAME }} | ConvertFrom-Json
-          $nics = az network nic list -g ${{ env.RESOURCE_GROUP_NAME }} --query '[*].{Name:name,PrivateIpAddress:ipConfigurations[0].privateIpAddress,ResourceGroup:resourceGroup}' | ConvertFrom-Json
-          foreach ($nic in $nics)
-          {
-            foreach ($vm in $vms) {
-              if ($nic.Name -eq $vm.Name) {
-                $dns= az network private-dns zone list -g ${{ steps.armDeployment.outputs.aksRgName }} | ConvertFrom-Json
-                az network private-dns record-set a add-record -g ${{ steps.armDeployment.outputs.aksRgName }} -z $dns[0].name -n $vm.Name -a $nic.PrivateIpAddress
-              }
-            }
-          }          
-        shell: pwsh
-
-      - uses: gliech/create-github-secret-action@v1
-        name: Write ACR registry name in secrets
-        with:
-          name: AZURE_CONTAINER_REGISTRY
-          value: ${{ steps.armDeployment.outputs.arcName }}
-          pa_token: ${{ secrets.PA_TOKEN }}          
-
-      - uses: gliech/create-github-secret-action@v1
-        name: Write AKS name in secrets
-        with:
-          name: AKS_NAME
-          value: ${{ steps.armDeployment.outputs.aksName }}
-          pa_token: ${{ secrets.PA_TOKEN }}    
-
-      - uses: gliech/create-github-secret-action@v1
-        name: Write ACR Short Name in secrets
-        with:
-          name: ACR_SHORTNAME
-          value: ${{ steps.armDeployment.outputs.acrShortName }}
-          pa_token: ${{ secrets.PA_TOKEN }}    
-
-      - name: logout
-        run: |
-          az logout                              
