@@ -24,7 +24,7 @@ If it's not already done you will need to create a service principal to create y
 
 To do so follow the instruction [here](https://github.com/marketplace/actions/azure-login#configure-a-service-principal-with-a-secret).
 
-Copy/Paste the output result, you will need to create it for a GitHub Secret.  ** The scope** of the service principal for this demo should be at subscription level.
+Copy/Paste the output result, you will need to create it for a GitHub Secret.  **The scope** of the service principal for this demo should be at subscription level.
 
 ## Create an account for Snyk
 
@@ -32,7 +32,9 @@ One of the tool used in this demo is Snyk, Snyk is used to scan the code of the 
 
 Go to Snyk [website](https://snyk.io/) and create a free account.
 
-Select the eShopDaprDevOps repository only (you can choose more if you want)
+Select the eShopDaprDevOps repository only (you can choose more if you want).
+
+<img title="a title" alt="Alt text" src="/images/boo.svg">
 
 ## Toolchain
 
