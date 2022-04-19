@@ -130,6 +130,22 @@ Now is time to install all the storage services and Dapr components in AKS.  To 
 
 Right now, only payment api is possible to be deployed in Kubernetes.  All the other Github Action will only created the docker image and push it into an Azure Container Registry.
 
+Go to the **Actions** tab, run the payment-api.
+
+Once is done login again to one of the runner and connect to your AKS cluster.
+
+Once is done run this command
+
+```
+kubectl get svc -n eshopondapr
+```
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/loadbalancer.png">
+
+The payment-api use a Load Balancer Kubernetes Service.  Take not of the external IP address and copy/paste it in an Internet Browser.
+
+<img alt="Alt text" src="https://raw.githubusercontent.com/appdevgbb/eShopDaprDevOps/main/images/loadbalapayment.png">
+
 # Toolchain
 
 We used a variety of tools from various organizations in this project including Snyk, Aqua Security, Microsoft Defender and more.
