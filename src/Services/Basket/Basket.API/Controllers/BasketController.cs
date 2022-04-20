@@ -33,6 +33,7 @@ public class BasketController : ControllerBase
         return Ok(basket ?? new CustomerBasket(userId));
     }
 
+    // Customer Basket type
     [HttpPost]
     [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<CustomerBasket>> UpdateBasketAsync([FromBody] CustomerBasket value)
