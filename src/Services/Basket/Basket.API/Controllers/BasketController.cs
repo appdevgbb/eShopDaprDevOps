@@ -22,6 +22,7 @@ public class BasketController : ControllerBase
         _logger = logger;
     }
 
+
     [HttpGet]
     [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<CustomerBasket>> GetBasketAsync()
