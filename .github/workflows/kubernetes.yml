@@ -45,7 +45,7 @@ jobs:
   # Deploy database, service bus etc.
   deploy-core-services:     
     needs: [create-namespace-eshop,configure-acr]
-    uses: ./.github/workflows/deploy-container-cd.yml    
+    uses: ./.github/workflows/dev-sec-cd.yml
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/core/base
       kustomize-output-file: deploy/k8s/kustomize/core/base/core.yml
@@ -56,7 +56,7 @@ jobs:
 
   deploy-dapr-components:     
     needs: [create-namespace-eshop,configure-acr]
-    uses: ./.github/workflows/deploy-container-cd.yml    
+    uses: ./.github/workflows/dev-sec-cd.yml      
     with:      
       kustomize-input-directory: deploy/k8s/kustomize/dapr/base
       kustomize-output-file: deploy/k8s/kustomize/dapr/base/dapr.yml
